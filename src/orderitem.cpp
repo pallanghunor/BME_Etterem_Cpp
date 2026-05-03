@@ -1,5 +1,7 @@
 #include "orderitem.hpp"
 
+#include "memtrace.h"
+
 OrderItem::OrderItem(MenuItem* item, int quantity) : item(item), quantity(quantity) {}
 
 MenuItem* OrderItem::getItem() const {

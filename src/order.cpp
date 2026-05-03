@@ -1,5 +1,7 @@
 #include "order.hpp"
 
+#include "memtrace.h"
+
 void Order::addItem(MenuItem* item, int qty) {
     if (item == nullptr || qty <= 0) return;
 

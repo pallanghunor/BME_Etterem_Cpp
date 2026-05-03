@@ -1,5 +1,7 @@
 #include "drink.hpp"
 
+#include "memtrace.h"
+
 Drink::Drink(int id, const std::string& name, int price, bool available, double volume, bool isAlcoholic) : MenuItem(id, name, price, available), volume(volume), isAlcoholic(isAlcoholic) {}
 
 void Drink::print(std::ostream& os) const {

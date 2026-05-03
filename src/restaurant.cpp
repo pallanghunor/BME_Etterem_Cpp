@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <fstream>
 
+#include "memtrace.h"
+
 Restaurant::Restaurant() {
     // Alapértelmezett konstruktor
 }

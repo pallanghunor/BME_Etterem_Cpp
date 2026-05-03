@@ -5,6 +5,8 @@
 #include "food.hpp"
 #include "drink.hpp"
 
+#include "memtrace.h"
+
 // Segédfüggvény a menüpontok bekéréséhez (hibakezeléssel)
 int getMenuChoice() {
     int choice;

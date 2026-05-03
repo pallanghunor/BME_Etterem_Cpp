@@ -1,5 +1,7 @@
 #include "food.hpp"
 
+#include "memtrace.h"
+
 Food::Food(int id, const std::string& name, int price, bool available, const std::string& allergens) : MenuItem(id, name, price, available), allergens(allergens) {}
 
 void Food::print(std::ostream& os) const {

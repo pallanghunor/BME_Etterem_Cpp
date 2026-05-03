@@ -1,6 +1,8 @@
 #include "table.hpp"
 #include <stdexcept>
 
+#include "memtrace.h"
+
 Table::Table(int id, int seats, const std::string& description, int x, int y) 
     : id(id), seats(seats), description(description), x(x), y(y), occupied(false), currentOrder(nullptr) {  
 
