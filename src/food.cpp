@@ -1,0 +1,18 @@
+#include "food.hpp"
+
+Food::Food(int id, const std::string& name, int price, bool available, const std::string& allergens) : MenuItem(id, name, price, available), allergens(allergens) {}
+
+void Food::print(std::ostream& os) const {
+    os << "[Etel] " << name << " | Ar: " << price << " Ft | Allergenek: " << allergens;
+    if (!available) os << " (Nincs keszleten)";
+    os << "\n";
+}
+
+void Food::save(std::ostream& os) const {
+    // E;ID;Név;Ár;Elérhető;Allergének formátum a fájlba mentéshez
+    os << "E;" << id << ";" << name << ";" << price << ";" << available << ";" << allergens << "\n";
+}
+
+MenuItem* Food::clone() const {
+    return new Food(*this); // Létrehoz egy pontos másolatot saját magáról (deep copy előkészítés)
+}
