@@ -3,8 +3,6 @@
 
 #include <stdexcept>
 
-#include "memtrace.h"
-
 // Sablon (template) osztály, hogy bármilyen típust (T) tárolhassunk benne
 template <typename T>
 class List {
