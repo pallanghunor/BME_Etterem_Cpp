@@ -12,6 +12,7 @@ protected:
     bool available;
 
 public:
+    MenuItem() : id(0), price(0), available(false) {}
     MenuItem(int id, const std::string& name, int price, bool available);
     
     virtual ~MenuItem() {};
@@ -24,6 +25,8 @@ public:
     virtual void save(std::ostream& os) const = 0;
     
     virtual MenuItem* clone() const = 0;
+
+    virtual void read(std::istream& is) = 0;
 };
 
 #endif // MENUITEM_HPP

@@ -92,9 +92,71 @@ void Restaurant::showOccupancyMap() const {
 }
 
 void Restaurant::loadData() {
-    std::cout << "Adatok betoltese folyamatban ...\n";
+    std::ifstream mFile(menuFile);
+    if (!mFile.is_open()) return;
+
+    std::string type;
+    
+    // A típust jelző karakter kiolvasása pontosvesszőig (pl. "E" vagy "I")
+    while (std::getline(mFile, type, ';')) {
+        
+        // Üres sorok és extra sortörések elleni védelem
+        if (type.length() > 0 && type[0] == '\n') type.erase(0, 1);
+        if (type.length() > 0 && type[0] == '\r') type.erase(0, 1);
+        if (type.empty()) continue;
+
+        MenuItem* item = nullptr;
+
+        // 1. Lépés: Példányosítás, típus alapján
+        if (type == "E") {
+            item = new Food();
+        } else if (type == "I") {
+            item = new Drink();
+        }
+
+        if (item != nullptr) {
+            // 2. Lépés: Az objektum beolvassa a saját maradék adatait a fájlból
+            item->read(mFile);
+            
+            // 3. Lépés: Hozzáadás a heterogén listához
+            addMenuItem(item);
+        } else {
+            // TODO: Hiba kiírása
+            // Maradék sor olvasása a fájlból, hogy ne akadjon meg a következő iterációban
+            std::string discard;
+            std::getline(mFile, discard);
+        }
+    }
+    mFile.close();
+    
 }
 
 void Restaurant::saveData() const {
-    std::cout << "Adatok mentese folyamatban ...\n";
+    // 1. Étlap kimentése
+    std::ofstream mFile(menuFile);
+    if (mFile.is_open()) {
+        for (auto it = menu.begin(); it != menu.end(); ++it) {
+            (*it)->save(mFile);
+        }
+        mFile.close();
+    } else {
+        throw std::runtime_error("Nem sikerult megnyitni a menufajlt mentesre!");
+    }
+
+    // 2. Asztalok kimentése
+    std::ofstream tFile(tablesFile);
+    if (tFile.is_open()) {
+        for (auto it = tables.begin(); it != tables.end(); ++it) {
+            // Formátum: ID;Férőhely;Leírás;X;Y;Foglalt-e
+            tFile << (*it).getId() << ";" 
+                  << (*it).getSeats() << ";" 
+                  << (*it).getDescription() << ";" 
+                  << (*it).getX() << ";" 
+                  << (*it).getY() << ";" 
+                  << (*it).isOccupied() << "\n";
+        }
+        tFile.close();
+    } else {
+        throw std::runtime_error("Nem sikerult megnyitni az asztalfajlt mentesre!");
+    }
 }
