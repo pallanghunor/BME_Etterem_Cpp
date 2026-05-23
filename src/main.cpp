@@ -4,113 +4,102 @@
 #include "restaurant.hpp"
 #include "food.hpp"
 #include "drink.hpp"
+#include "ui.hpp"
 
 #include "memtrace.h"
 
-// Segédfüggvény a menüpontok bekéréséhez (hibakezeléssel)
-int getMenuChoice() {
+// Segédfüggvény a biztonságos szám bekéréshez (4. fázis előfutára)
+int getIntInput() {
     int choice;
-    std::cout << "\nValasszon menupontot: ";
+    std::cout << "Valasztas: ";
     while (!(std::cin >> choice)) {
-        std::cin.clear(); // Hibaállapot törlése
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Szemét kipucolása a pufferből
-        std::cout << "Ervenytelen bemenet! Kerem, szamot adjon meg: ";
+        std::cin.clear();
+        std::cin.ignore(10000, '\n');
+        std::cout << "Ervenytelen bemenet! Kerem szamot adjon meg: ";
     }
     return choice;
 }
 
 int main() {
-    // 1. A központi vezérlő példányosítása
     Restaurant bmeEtterem;
+    bmeEtterem.loadData(); // Adatok betöltése fájlokból
 
-    std::cout << "=== BME Etterem Kezelo Rendszer (Skeleton) ===\n\n";
-
-    try {
-        // 2. Kezdetleges tesztadatok betöltése a működés demonstrálására
-        // (A végleges verzióban ez a loadData() fájlbeolvasásából jönne)
-        std::cout << "[Rendszer] Tesztadatok inicializalasa...\n";
-        
-        // Polimorfizmus bemutatása: Különböző típusok mennek ugyanabba a listába
-        bmeEtterem.addMenuItem(new Food(1, "Becsi Szelet", 3500, true, "Gluten, Tojas"));
-        bmeEtterem.addMenuItem(new Drink(2, "Csapolt Sor", 1200, true, 0.5, true));
-        bmeEtterem.addMenuItem(new Drink(3, "Limonade", 1500, true, 0.5, false));
-
-        // Asztalok felvétele
-        bmeEtterem.addTable(1, 4, "Ablak melletti", 0, 0);
-        bmeEtterem.addTable(2, 2, "Kozepso kicsi", 2, 2);
-        
-        // 3. Osztályok kapcsolatának demonstrálása (Rendelés felvétele az 1-es asztalhoz)
-        std::cout << "[Rendszer] Rendeles felvetele az 1-es asztalhoz...\n";
-        Table* t1 = bmeEtterem.getTableById(1);
-        if (t1) {
-            t1->openOrder();
-            t1->addItemToOrder(bmeEtterem.getMenuItemById(1), 2); // 2 db Bécsi szelet
-            t1->addItemToOrder(bmeEtterem.getMenuItemById(2), 2); // 2 db Sör
-        }
-        
-    } catch (const std::exception& e) {
-        std::cerr << "Kritikus hiba az inditaskor: " << e.what() << "\n";
-        return 1;
-    }
-
-    // 4. Interaktív Felhasználói Felület (UI) ciklusa
     bool fut = true;
-    while (fut) {
-        std::cout << "\n--- Fomenu ---\n";
-        std::cout << "1. Etlap megtekintese\n";
-        std::cout << "2. 1-es asztal szamlajanak lezarasa es kinyomtatasa\n";
-        std::cout << "3. Biztonsagos torles tesztelese (Sor torlese)\n";
-        std::cout << "0. Kilepes\n";
+    
+    // --- FLASH MESSAGE VÁLTOZÓK ---
+    // Ezt a két változót használjuk arra, hogy üzenetet küldjünk "vissza" a menü tetejére
+    std::string flashMessage = "";
+    MsgType flashType = MsgType::NONE;
 
-        int valasztas = getMenuChoice();
+    while (fut) {
+        // [Ide jön majd a system("clear") vagy ("cls") a legvégén!]
+        std::cout << "\n\n";
+
+        // 1. FLASH MESSAGE MEGJELENÍTÉSE
+        // Ha van beállítva üzenet (pl. egy korábbi sikeres művelet miatt), akkor kiírjuk a tetejére
+        if (!flashMessage.empty()) {
+            UI::printMsgBox(flashMessage, flashType);
+            
+            // AZONNAL KIÜRÍTJÜK, hogy a következő képernyőfrissítésnél eltűnjön!
+            flashMessage = "";
+            flashType = MsgType::NONE;
+        }
+
+        // 2. FŐMENÜ KIRAJZOLÁSA (Ahogy a print.c-ben is volt)
+        std::cout << "+==============================+\n";
+        std::cout << "|      BME ETTEREM KEZELO      |\n";
+        std::cout << "+==============================+\n";
+        std::cout << "1. Asztalok kezelese\n";
+        std::cout << "2. Etlap kezelese\n";
+        std::cout << "3. Rendelesek\n";
+        std::cout << "4. Foglaltsagi terkep\n";
+        std::cout << "0. Kilepes es mentes\n";
+        std::cout << "+------------------------------+\n";
+
+        int valasztas = getIntInput();
 
         switch (valasztas) {
             case 1:
-                std::cout << "\n--- ETLAP ---\n";
-                for (int i = 1; i <= 3; ++i) {
-                    MenuItem* item = bmeEtterem.getMenuItemById(i);
-                    if (item) {
-                        item->print(std::cout);
-                    }
-                }
+                // TODO: Asztal almenü
+                flashMessage = "Az asztalok kezelese menu meg nincs kesz!";
+                flashType = MsgType::WARNING;
                 break;
 
             case 2:
-                std::cout << "\n--- SZAMLA ZARASA (1-es asztal) ---\n";
-                try {
-                    Table* t = bmeEtterem.getTableById(1);
-                    if (t && t->hasActiveOrder()) {
-                        t->closeTable(std::cout); 
-                        std::cout << "Az asztal sikeresen lezarva es felszabaditva.\n";
-                    } else {
-                        std::cout << "Az asztal nem talalhato, vagy nincs aktiv rendelese.\n";
-                    }
-                } catch (const std::exception& e) {
-                    std::cout << "Hiba a szamlazas soran: " << e.what() << "\n";
-                }
+                // TODO: Étlap almenü
+                flashMessage = "Az etlap kezelese menu meg nincs kesz!";
+                flashType = MsgType::WARNING;
                 break;
 
             case 3:
-                std::cout << "\n--- TORLES TESZT ---\n";
-                try {
-                    std::cout << "Megprobalom torolni a 2-es ID-ju tetelt (Sor)...\n";
-                    bmeEtterem.deleteMenuItem(2);
-                    std::cout << "Sikeresen torolve!\n";
-                } catch (const std::exception& e) {
-                    std::cout << "HIBA: " << e.what() << "\n";
-                }
+                // SZIMULÁCIÓ: Valaki felvett egy rendelést a 3-as menüben
+                // Miután végigment a logikán, beállítja az üzenetet és visszadobja a főmenübe
+                flashMessage = "Sikeresen felvetted a rendelest a 2-es asztalhoz!";
+                flashType = MsgType::SUCCESS;
+                break;
+
+            case 4:
+                bmeEtterem.showOccupancyMap();
+                UI::pause();
                 break;
 
             case 0:
                 fut = false;
-                std::cout << "Kilepes... Adatok mentese es memoria takaritasa.\n";
+                std::cout << "Adatok mentese...\n";
+                try {
+                    bmeEtterem.saveData();
+                    std::cout << "Sikeres mentes. Kilepes!\n";
+                } catch (const std::exception& e) {
+                    std::cout << "Hiba mentes kozben: " << e.what() << "\n";
+                }
                 break;
 
             default:
-                std::cout << "Nincs ilyen menupont!\n";
+                flashMessage = "Nincs ilyen menupont!";
+                flashType = MsgType::ERROR;
                 break;
         }
     }
-    
+
     return 0;
 }
