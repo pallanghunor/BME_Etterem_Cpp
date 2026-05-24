@@ -1025,9 +1025,9 @@ void UI::orderMenu()
     }
 }
 
-std::vector<std::string> UI::wordWrap(const std::string &text, int maxWidth)
+List<std::string> UI::wordWrap(const std::string &text, int maxWidth)
 {
-    std::vector<std::string> lines;
+    List<std::string> lines;
     std::istringstream words(text);
     std::string word;
     std::string currentLine;
@@ -1065,9 +1065,10 @@ void UI::printMsgBox(const std::string &msg, MsgType type)
 
     std::string border(HEADER_LENGTH, '=');
     std::cout << color << border << "\n";
-    std::vector<std::string> lines = wordWrap(msg, maxContentWidth);
-    for (const std::string &line : lines)
+    List<std::string> lines = wordWrap(msg, maxContentWidth);
+    for (auto it = lines.begin(); it != lines.end(); ++it)
     {
+        std::string line = *it;
         int padLeft = (maxContentWidth - line.length()) / 2;
         int padRight = maxContentWidth - line.length() - padLeft;
         std::cout << "| " << std::string(padLeft, ' ') << line << std::string(padRight, ' ') << " |\n";

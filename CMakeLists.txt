@@ -6,7 +6,7 @@ project(BME_Etterem_NHF CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_compile_options(-Wall -Wextra -pedantic -g)
+add_compile_options(-Wall -Wextra -pedantic -g -DMEMTRACE)
 
 include_directories(include)
 

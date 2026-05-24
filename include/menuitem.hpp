@@ -18,15 +18,21 @@ public:
 
     virtual ~MenuItem() {};
 
+    // Getters
     int getId() const;
     int getPrice() const;
     std::string getName() const;
-    bool isAvailable() const;
+    
+    // Setters
     void setName(const std::string &name);
-        static void validateName(const std::string& name);
-        static void validatePrice(int price);
     void setPrice(int price);
     void setAvailable(bool available);
+    
+    bool isAvailable() const;
+
+    // Validációs függvények
+    static void validateName(const std::string& name);
+    static void validatePrice(int price);
 
     virtual void print(std::ostream &os) const = 0;
     virtual void save(std::ostream &os) const = 0;

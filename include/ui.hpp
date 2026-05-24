@@ -67,7 +67,7 @@ private:
     // Rendelés menedzsment
     void orderMenu();
 
-    static std::vector<std::string> wordWrap(const std::string &text, int maxWidth);
+    static List<std::string> wordWrap(const std::string &text, int maxWidth);
 
 public:
     UI(Restaurant &r);

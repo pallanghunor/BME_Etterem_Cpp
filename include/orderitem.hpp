@@ -11,11 +11,14 @@ private:
 public:
     OrderItem(MenuItem* item, int quantity);
 
+    // Getterek
     MenuItem* getItem() const;
     int getQuantity() const;
+    int getSubtotal() const;
+
+    // Setterek
     void setQuantity(int qty);
 
-    int getSubtotal() const;
 };
 
 #endif // ORDERITEM_HPP

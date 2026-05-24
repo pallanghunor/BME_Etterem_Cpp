@@ -12,11 +12,14 @@ private:
 public:
     Drink() = default;
     Drink(int id, const std::string &name, int price, bool available, double volume, bool isAlcoholic);
+    
     bool getIsAlcoholic() const;
+    
     void setVolume(double volume);
-    static void validateVolume(double volume);
     void setAlcoholic(bool isAlcoholic);
-
+    
+    static void validateVolume(double volume);
+    
     void print(std::ostream &os) const override;
     void save(std::ostream &os) const override;
     MenuItem *clone() const override;

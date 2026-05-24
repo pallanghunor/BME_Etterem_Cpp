@@ -2,7 +2,11 @@
 
 #include "memtrace.h"
 
-OrderItem::OrderItem(MenuItem* item, int quantity) : item(item), quantity(quantity) {}
+OrderItem::OrderItem(MenuItem* item, int quantity) : item(item), quantity(quantity) {
+    if (item == nullptr) {
+        throw std::invalid_argument("Hiba: az OrderItem nem tartalmazhat nullptr MenuItem-et!");
+    }
+}
 
 MenuItem* OrderItem::getItem() const {
     return item;

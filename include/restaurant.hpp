@@ -50,21 +50,21 @@ public:
     // Étlap kezelése
     void addMenuItem(MenuItem *item);
     void deleteMenuItem(int id);
-    void printMenu() const;
     MenuItem *getMenuItemById(int id) const;
-
-    // Asztalok és rendelések kezelése
+    
+    // Asztalok kezelése
     void addTable(int id, int seats, const std::string &desc, int x, int y);
     Table *getTableById(int id);
     void deleteTable(int id);
-
+    
     bool isTableIdTaken(int id) const;
     bool isTableAt(int x, int y) const;
-
-    void printTables() const;
+    
+    void printMenu(std::ostream &os) const;
+    void printTables(std::ostream &os) const;
 
     // Étterem térkép megjelenítése
-    void showOccupancyMap() const;
+    void showOccupancyMap(std::ostream &os) const;
 };
 
 #endif // RESTAURANT_HPP

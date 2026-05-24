@@ -68,19 +68,19 @@ void Restaurant::deleteMenuItem(int id)
     delete itemToDelete; // Felszabadítjuk magát a memóriát
 }
 
-void Restaurant::printMenu() const
+void Restaurant::printMenu(std::ostream &os) const
 {
     if (menu.getSize() == 0)
     {
-        std::cout << "Az etlap jelenleg ures.\n";
+        os << "Az etlap jelenleg ures.\n";
         return;
     }
-    std::cout << "--- ELERHETO ETLAP ---\n\n";
+    os << "--- ELERHETO ETLAP ---\n\n";
     for (auto it = menu.begin(); it != menu.end(); ++it)
     {
-        (*it)->print(std::cout);
+        (*it)->print(os);
     }
-    std::cout << "\n----------------------\n";
+    os << "\n----------------------\n";
 }
 
 MenuItem *Restaurant::getMenuItemById(int id) const
@@ -168,18 +168,18 @@ bool Restaurant::isTableAt(int x, int y) const
     return false;
 }
 
-void Restaurant::printTables() const
+void Restaurant::printTables(std::ostream &os) const
 {
     if (tables.getSize() == 0)
     {
-        std::cout << "Jelenleg nincsenek asztalok a rendszerben.\n";
+        os << "Jelenleg nincsenek asztalok a rendszerben.\n";
         return;
     }
 
     for (auto it = tables.begin(); it != tables.end(); ++it)
     {
-        (*it).printTable(std::cout);
-        std::cout << "\n";
+        (*it).printTable(os);
+        os << "\n";
     }
 }
 
@@ -378,34 +378,29 @@ void Restaurant::saveData() const
     }
 }
 
-void Restaurant::showOccupancyMap() const
+void Restaurant::showOccupancyMap(std::ostream &os) const
 {
     if (tables.getSize() == 0)
     {
-        std::cout << "Jelenleg nincsenek asztalok az etteremben.\n";
+        os << "Jelenleg nincsenek asztalok az etteremben.\n";
         return;
     }
 
-    // 1. A C-s projektből áthozott konstans méretek (15x10)
-    const int REST_SIZE_X = 15;
-    const int REST_SIZE_Y = 10;
-
-    // 2. ANSI Színkódok (a régi getColorCode() logikája alapján)
+    // 2. ANSI Színkódok
     const std::string COLOR_RED = "\x1b[31m";
     const std::string COLOR_GREEN = "\x1b[32m";
     const std::string COLOR_RESET = "\x1b[0m";
 
-    std::cout << "\n=== FOGLALTSAGI TERKEP ===\n\n";
+    os << "\n=== FOGLALTSAGI TERKEP ===\n\n";
 
     // 3. A rács kirajzolása (Y és X koordináták szerint)
-    for (int y = 0; y <= REST_SIZE_Y; y++)
+    for (int y = 0; y <= MAX_Y; y++)
     {
-        for (int x = 0; x <= REST_SIZE_X; x++)
+        for (int x = 0; x <= MAX_X; x++)
         {
 
             bool foundTable = false;
 
-            // Megnézzük, van-e asztal ezen a koordinátán
             for (auto it = tables.begin(); it != tables.end(); ++it)
             {
                 if ((*it).getX() == x && (*it).getY() == y)
@@ -414,34 +409,33 @@ void Restaurant::showOccupancyMap() const
                     // Szín beállítása foglaltság alapján
                     if ((*it).isOccupied())
                     {
-                        std::cout << COLOR_RED;
+                        os << COLOR_RED;
                     }
                     else
                     {
-                        std::cout << COLOR_GREEN;
+                        os << COLOR_GREEN;
                     }
 
                     // Azonosító kiírása mindig 2 karakter hosszan (pl. [01], [12])
-                    std::cout << "["
-                              << std::setw(2) << std::setfill('0') << (*it).getId()
-                              << "]" << COLOR_RESET;
+                    os << "["
+                       << std::setw(2) << std::setfill('0') << (*it).getId()
+                       << "]" << COLOR_RESET;
 
                     foundTable = true;
                     break;
                 }
             }
 
-            // Ha nem volt asztal, a C-s kód " .. " mintáját rajzoljuk
             if (!foundTable)
             {
-                std::cout << " .. ";
+                os << " .. ";
             }
         }
-        std::cout << "\n"; // Új sor a rácsban
+        os << "\n";
     }
 
-    std::cout << "==========================\n";
-    std::cout << "Jelmagyarazat: "
-              << COLOR_GREEN << "[01]" << COLOR_RESET << " = Szabad, "
-              << COLOR_RED << "[01]" << COLOR_RESET << " = Foglalt\n";
+    os << "==========================\n";
+    os << "Jelmagyarazat: "
+       << COLOR_GREEN << "[01]" << COLOR_RESET << " = Szabad, "
+       << COLOR_RED << "[01]" << COLOR_RESET << " = Foglalt\n";
 }

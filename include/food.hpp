@@ -11,7 +11,8 @@ private:
 public:
     Food() = default;
     Food(int id, const std::string& name, int price, bool available, const std::string& allergens);
-        void setAllergens(const std::string& allergens);
+    
+    void setAllergens(const std::string& allergens);
 
     void print(std::ostream& os) const override;
     void save(std::ostream& os) const override;
