@@ -26,6 +26,22 @@ void Order::removeItem(MenuItem* item) {
     }
 }
 
+void Order::updateItemQuantity(MenuItem* item, int newQty) {
+    if (item == nullptr) return;
+
+    if (newQty <= 0) {
+        removeItem(item);
+        return;
+    }
+
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        if ((*it).getItem() == item) {
+            (*it).setQuantity(newQty);
+            return;
+        }
+    }
+}
+
 bool Order::containsItem(MenuItem* item) const {
     for (auto it = items.begin(); it != items.end(); ++it) {
         if ((*it).getItem() == item) {

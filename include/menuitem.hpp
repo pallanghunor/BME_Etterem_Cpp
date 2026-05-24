@@ -4,6 +4,17 @@
 #include <string>
 #include <iostream>
 
+class Food;
+class Drink;
+
+// Látogató (Visitor) interfész
+class MenuItemVisitor {
+public:
+    virtual void visitFood(Food* food) = 0;
+    virtual void visitDrink(Drink* drink) = 0;
+    virtual ~MenuItemVisitor() = default;
+};
+
 class MenuItem
 {
 protected:
@@ -40,6 +51,9 @@ public:
     virtual MenuItem *clone() const = 0;
 
     virtual void read(std::istream &is) = 0;
+
+    // Látogató minta elfogadó metódusa
+    virtual void accept(MenuItemVisitor& visitor) = 0;
 };
 
 #endif // MENUITEM_HPP

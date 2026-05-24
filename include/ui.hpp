@@ -2,7 +2,6 @@
 #define UI_HPP
 
 #include <string>
-#include <vector>
 #include "restaurant.hpp"
 #include "table.hpp"
 
@@ -63,6 +62,19 @@ private:
     void deleteMenuItemMenu();
 
     MenuItem *selectMenuItemById();
+
+    // A UI saját privát látogatója, aki elvégzi az irányítást
+    class ModifyVisitor : public MenuItemVisitor {
+        UI& ui;
+    public:
+        ModifyVisitor(UI& u) : ui(u) {}
+        void visitFood(Food* food) override;
+        void visitDrink(Drink* drink) override;
+    };
+
+    // Két dedikált, típus biztos almenü
+    void modifyFoodInteractive(Food* food);
+    void modifyDrinkInteractive(Drink* drink);
 
     // Rendelés menedzsment
     void orderMenu();

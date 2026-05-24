@@ -25,6 +25,8 @@ public:
     MenuItem *clone() const override;
 
     void read(std::istream &is) override;
+
+    void accept(MenuItemVisitor& visitor) override;
 };
 
 #endif // DRINK_HPP

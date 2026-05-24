@@ -110,7 +110,7 @@ void UI::run()
             orderMenu();
             break;
         case 4:
-            restaurant.showOccupancyMap();
+            restaurant.showOccupancyMap(std::cout);
             pause();
             break;
         case 0:
@@ -385,7 +385,7 @@ int UI::getValidatedSeats(int minSeats)
 Table *UI::selectTableById()
 {
     std::cout << "--- ELERHETO ASZTALOK ---\n\n";
-    restaurant.printTables();
+    restaurant.printTables(std::cout);
     std::cout << "\n-------------------------\n";
 
     int id = getIntInput("Add meg az asztal ID-jat (0: vissza): ");
@@ -489,7 +489,7 @@ void UI::menuMenu()
 void UI::viewMenuMenu()
 {
     consoleClear();
-    restaurant.printMenu();
+    restaurant.printMenu(std::cout);
     pause();
 }
 
@@ -497,7 +497,7 @@ void UI::viewMenuMenu()
 MenuItem *UI::selectMenuItemById()
 {
     consoleClear();
-    restaurant.printMenu();
+    restaurant.printMenu(std::cout);
 
     int id = getIntInput("Add meg a tetel ID-jat (0: vissza): ");
     if (id == 0)
@@ -575,41 +575,55 @@ void UI::addMenuItemMenu()
     }
 }
 
-// Tétel módosítása az étlapon
+// ============================================================================
+// ÚJ: MODIFIVISITOR IMPLEMENTÁCIÓ (Összeköti az objektumot a UI almenükkel)
+// ============================================================================
+void UI::ModifyVisitor::visitFood(Food *food)
+{
+    ui.modifyFoodInteractive(food);
+}
+
+void UI::ModifyVisitor::visitDrink(Drink *drink)
+{
+    ui.modifyDrinkInteractive(drink);
+}
+
+// ============================================================================
+// A MEGÚJULT FŐ MÓDOSÍTÓ MENÜ (Tiszta polimorfizmus, nincs cast!)
+// ============================================================================
 void UI::modifyMenuItemMenu()
 {
     MenuItem *item = selectMenuItemById();
     if (item == nullptr)
     {
-        return;
+        return; // Visszalépés, ha nem választott érvényes tételt
     }
 
+    // Elküldjük a látogatót. Az objektum (Food vagy Drink) magától tudja,
+    // melyik visit függvényt kell visszahívnia a típusának megfelelően!
+    ModifyVisitor visitor(*this);
+    item->accept(visitor);
+}
+
+// ============================================================================
+// KÜLÖNVÁLASZTOTT, TÍPUSSZPECIFIKUS INTERAKTÍV ALMENÜK
+// ============================================================================
+
+void UI::modifyFoodInteractive(Food *food)
+{
     bool back = false;
     while (!back)
     {
         consoleClear();
         printFlashMessage();
 
-        std::cout << "--- TETEL MODOSITASA (ID: " << item->getId() << ") ---\n\n";
-        item->print(std::cout);
+        std::cout << "--- ETEL MODOSITASA (ID: " << food->getId() << ") ---\n\n";
+        food->print(std::cout);
         std::cout << "\n";
         std::cout << "1. Nev\n";
         std::cout << "2. Ar\n";
         std::cout << "3. Elerhetoseg\n";
-
-        Food *food = dynamic_cast<Food *>(item);
-        Drink *drink = dynamic_cast<Drink *>(item);
-
-        if (food != nullptr)
-        {
-            std::cout << "4. Allergenek\n";
-        }
-        else if (drink != nullptr)
-        {
-            std::cout << "4. Urtartalom\n";
-            std::cout << "5. Alkoholos\n";
-        }
-
+        std::cout << "4. Allergenek\n";
         std::cout << "0. Vissza\n";
 
         int choice = getIntInput("Valasztas: ");
@@ -619,61 +633,99 @@ void UI::modifyMenuItemMenu()
             switch (choice)
             {
             case 1:
-                item->setName(askValidatedName("Uj nev: "));
+                food->setName(askValidatedName("Uj nev: "));
                 flashMessage = "Nev sikeresen modositva!";
                 flashType = MsgType::SUCCESS;
                 break;
 
             case 2:
-            {
-                int newPrice = askValidatedPrice("Uj ar (Ft): ");
-                item->setPrice(newPrice);
+                food->setPrice(askValidatedPrice("Uj ar (Ft): "));
                 flashMessage = "Ar sikeresen modositva!";
                 flashType = MsgType::SUCCESS;
                 break;
-            }
 
             case 3:
-            {
-                item->setAvailable(!item->isAvailable());
-                flashMessage = std::string("Elerhetoseg atallitva erre: ") + (item->isAvailable() ? "ELERHETO" : "NEM ELERHETO");
+                food->setAvailable(!food->isAvailable());
+                flashMessage = std::string("Elerhetoseg atallitva erre: ") + (food->isAvailable() ? "ELERHETO" : "NEM ELERHETO");
                 flashType = MsgType::SUCCESS;
                 break;
-            }
 
             case 4:
-                if (food != nullptr)
-                {
-                    food->setAllergens(getStringInput("Uj allergenek: "));
-                    flashMessage = "Allergenek sikeresen modositva!";
-                    flashType = MsgType::SUCCESS;
-                }
-                else if (drink != nullptr)
-                {
-                    double newVol = askValidatedVolume("Uj urtartalom (liter): ");
-                    drink->setVolume(newVol);
-                    flashMessage = "Urtartalom sikeresen modositva!";
-                    flashType = MsgType::SUCCESS;
-                }
-                else
-                {
-                    flashMessage = "Nincs ilyen menupont!";
-                    flashType = MsgType::ERROR;
-                }
+                food->setAllergens(getStringInput("Uj allergenek: "));
+                flashMessage = "Allergenek sikeresen modositva!";
+                flashType = MsgType::SUCCESS;
+                break;
+
+            case 0:
+                back = true;
+                break;
+
+            default:
+                flashMessage = "Nincs ilyen menupont!";
+                flashType = MsgType::ERROR;
+                break;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            flashMessage = std::string("Hiba a modositaskor: ") + e.what();
+            flashType = MsgType::ERROR;
+        }
+    }
+}
+
+void UI::modifyDrinkInteractive(Drink *drink)
+{
+    bool back = false;
+    while (!back)
+    {
+        consoleClear();
+        printFlashMessage();
+
+        std::cout << "--- ITAL MODOSITASA (ID: " << drink->getId() << ") ---\n\n";
+        drink->print(std::cout);
+        std::cout << "\n";
+        std::cout << "1. Nev\n";
+        std::cout << "2. Ar\n";
+        std::cout << "3. Elerhetoseg\n";
+        std::cout << "4. Urtartalom\n";
+        std::cout << "5. Alkoholos\n";
+        std::cout << "0. Vissza\n";
+
+        int choice = getIntInput("Valasztas: ");
+
+        try
+        {
+            switch (choice)
+            {
+            case 1:
+                drink->setName(askValidatedName("Uj nev: "));
+                flashMessage = "Nev sikeresen modositva!";
+                flashType = MsgType::SUCCESS;
+                break;
+
+            case 2:
+                drink->setPrice(askValidatedPrice("Uj ar (Ft): "));
+                flashMessage = "Ar sikeresen modositva!";
+                flashType = MsgType::SUCCESS;
+                break;
+
+            case 3:
+                drink->setAvailable(!drink->isAvailable());
+                flashMessage = std::string("Elerhetoseg atallitva erre: ") + (drink->isAvailable() ? "ELERHETO" : "NEM ELERHETO");
+                flashType = MsgType::SUCCESS;
+                break;
+
+            case 4:
+                drink->setVolume(askValidatedVolume("Uj urtartalom (liter): "));
+                flashMessage = "Urtartalom sikeresen modositva!";
+                flashType = MsgType::SUCCESS;
                 break;
 
             case 5:
-                if (drink != nullptr)
-                {
-                    drink->setAlcoholic(!drink->getIsAlcoholic());
-                    flashMessage = std::string("Alkoholossag atallitva erre: ") + (drink->getIsAlcoholic() ? "ALKOHOLOS" : "NEM ALKOHOLOS");
-                    flashType = MsgType::SUCCESS;
-                }
-                else
-                {
-                    flashMessage = "Nincs ilyen menupont!";
-                    flashType = MsgType::ERROR;
-                }
+                drink->setAlcoholic(!drink->getIsAlcoholic());
+                flashMessage = std::string("Alkoholossag atallitva erre: ") + (drink->getIsAlcoholic() ? "ALKOHOLOS" : "NEM ALKOHOLOS");
+                flashType = MsgType::SUCCESS;
                 break;
 
             case 0:
@@ -876,7 +928,7 @@ void UI::orderMenu()
                 std::cout << "-----------------------------------\n";
                 for (auto it = items.begin(); it != items.end(); ++it)
                 {
-                    OrderItem &orderItem = *it;
+                    const OrderItem &orderItem = *it;
                     MenuItem *menuItem = orderItem.getItem();
                     if (menuItem != nullptr)
                     {
@@ -894,19 +946,18 @@ void UI::orderMenu()
                     break;
                 }
 
-                OrderItem *selectedOrderItem = nullptr;
+                MenuItem *itemToUpdate = nullptr;
                 for (auto it = items.begin(); it != items.end(); ++it)
                 {
-                    OrderItem &orderItem = *it;
-                    MenuItem *menuItem = orderItem.getItem();
+                    MenuItem *menuItem = (*it).getItem();
                     if (menuItem != nullptr && menuItem->getId() == itemId)
                     {
-                        selectedOrderItem = &orderItem;
+                        itemToUpdate = menuItem;
                         break;
                     }
                 }
 
-                if (selectedOrderItem == nullptr)
+                if (itemToUpdate == nullptr)
                 {
                     flashMessage = "A megadott ID-jú tetel nincs benne ebben a rendelesben.";
                     flashType = MsgType::ERROR;
@@ -928,13 +979,13 @@ void UI::orderMenu()
                 {
                     if (newQuantity == 0)
                     {
-                        order->removeItem(selectedOrderItem->getItem());
+                        order->removeItem(itemToUpdate);
                         flashMessage = "Tetel sikeresen torolve a rendelesbol.";
                         flashType = MsgType::SUCCESS;
                     }
                     else
                     {
-                        selectedOrderItem->setQuantity(newQuantity);
+                        order->updateItemQuantity(itemToUpdate, newQuantity);
                         flashMessage = "Tetel darabszama sikeresen modositva.";
                         flashType = MsgType::SUCCESS;
                     }
@@ -955,11 +1006,12 @@ void UI::orderMenu()
                     flashType = MsgType::INFO;
                     break;
                 }
-                try {
+                try
+                {
                     // 1. Mai dátum lekérése és formázása
                     std::time_t t = std::time(nullptr);
-                    std::tm* now = std::localtime(&t);
-                    
+                    std::tm *now = std::localtime(&t);
+
                     std::stringstream dateStream;
                     dateStream << (now->tm_year + 1900) << "_"
                                << std::setw(2) << std::setfill('0') << (now->tm_mon + 1) << "_"
@@ -970,11 +1022,14 @@ void UI::orderMenu()
                     int nextSeq = 1;
                     std::string counterFileName = "szamla_counter.txt";
                     std::ifstream counterIn(counterFileName);
-                    if (counterIn.is_open()) {
+                    if (counterIn.is_open())
+                    {
                         std::string savedDate;
                         int savedSeq;
-                        if (counterIn >> savedDate >> savedSeq) {
-                            if (savedDate == todayStr) {
+                        if (counterIn >> savedDate >> savedSeq)
+                        {
+                            if (savedDate == todayStr)
+                            {
                                 nextSeq = savedSeq + 1;
                             }
                         }
@@ -983,7 +1038,8 @@ void UI::orderMenu()
 
                     // 3. Sorszám mentése a segédfájlba
                     std::ofstream counterOut(counterFileName);
-                    if (counterOut.is_open()) {
+                    if (counterOut.is_open())
+                    {
                         counterOut << todayStr << " " << nextSeq;
                         counterOut.close();
                     }
@@ -993,19 +1049,21 @@ void UI::orderMenu()
 
                     // 5. Fájl megnyitása és asztal lezárása
                     std::ofstream outFile(finalFilename);
-                    if (!outFile.is_open()) {
+                    if (!outFile.is_open())
+                    {
                         throw std::runtime_error("Nem sikerult letrehozni a szamlafajlt!");
                     }
 
-                    table->closeTable(outFile); 
+                    table->closeTable(outFile);
                     outFile.close();
 
                     flashMessage = "Sikeres fizetes! Szamla: " + finalFilename;
                     flashType = MsgType::SUCCESS;
-                    
-                    back = true; 
 
-                } catch (const std::exception& e) {
+                    back = true;
+                }
+                catch (const std::exception &e)
+                {
                     flashMessage = std::string("Hiba a fizeteskor: ") + e.what();
                     flashType = MsgType::ERROR;
                 }

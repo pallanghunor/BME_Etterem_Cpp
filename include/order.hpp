@@ -18,6 +18,9 @@ public:
     // Tétel eltávolítása a rendelésből
     void removeItem(MenuItem* item);
 
+    // Tétel mennyiségének módosítása a rendelésben
+    void updateItemQuantity(MenuItem* item, int newQty);
+
     // Szerepel-e már az adott tétel a rendelésben
     bool containsItem(MenuItem* item) const;
 

@@ -50,3 +50,7 @@ void Food::read(std::istream &is)
     std::getline(is, allergens);
     trimCR(allergens); // Jporta \r levágása
 }
+
+void Food::accept(MenuItemVisitor& visitor) {
+    visitor.visitFood(this); 
+}
