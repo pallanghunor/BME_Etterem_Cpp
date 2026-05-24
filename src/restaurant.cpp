@@ -9,117 +9,230 @@
 
 #include "memtrace.h"
 
-Restaurant::Restaurant() {
-    // Alapértelmezett konstruktor
-}
+Restaurant::Restaurant() : nextTableId(1), nextMenuItemId(1) {}
 
-Restaurant::~Restaurant() {
+Restaurant::~Restaurant()
+{
     // Felszabadítjuk a dinamikusan foglalt MenuItem-eket
-    for (auto it = menu.begin(); it != menu.end(); ++it) {
-        delete (*it); 
+    for (auto it = menu.begin(); it != menu.end(); ++it)
+    {
+        delete (*it);
     }
 }
 
-void Restaurant::addMenuItem(MenuItem* item) {
-    if (item != nullptr) {
+void Restaurant::addMenuItem(MenuItem *item)
+{
+    if (item != nullptr)
+    {
         menu.push_back(item);
+        nextMenuItemId = std::max(nextMenuItemId, item->getId() + 1);
     }
 }
 
 // Biztonságos törlés (Dangling pointer védelem)
-void Restaurant::deleteMenuItem(int id) {
+void Restaurant::deleteMenuItem(int id)
+{
     // 1. Megkeressük a törlendő elemet az étlapon
-    MenuItem* itemToDelete = nullptr;
+    MenuItem *itemToDelete = nullptr;
     auto menuIt = menu.begin();
-    
-    for (; menuIt != menu.end(); ++menuIt) {
-        if ((*menuIt)->getId() == id) {
+
+    for (; menuIt != menu.end(); ++menuIt)
+    {
+        if ((*menuIt)->getId() == id)
+        {
             itemToDelete = *menuIt;
             break;
         }
     }
-    
-    if (itemToDelete == nullptr) {
+
+    if (itemToDelete == nullptr)
+    {
         throw std::invalid_argument("Nincs ilyen ID-ju tetel az etlapon!");
     }
 
     // 2. Biztonsági ellenőrzés: Használja-e valamelyik asztal ezt az elemet?
-    for (auto tableIt = tables.begin(); tableIt != tables.end(); ++tableIt) {
-        if ((*tableIt).hasActiveOrder()) {
-            Order* order = (*tableIt).getOrder();
-            if (order->containsItem(itemToDelete)) {
+    for (auto tableIt = tables.begin(); tableIt != tables.end(); ++tableIt)
+    {
+        if ((*tableIt).hasActiveOrder())
+        {
+            Order *order = (*tableIt).getOrder();
+            if (order->containsItem(itemToDelete))
+            {
                 // Ha igen, kivételt dobunk, nem engedjük a törlést!
                 throw std::logic_error("A tetel nem torolheto, mert egy aktiv rendelesben szerepel!");
             }
         }
     }
 
-    menu.erase(menuIt);   // Eltávolítjuk a mutatót a listából
-    delete itemToDelete;  // Felszabadítjuk magát a memóriát
+    menu.erase(menuIt);  // Eltávolítjuk a mutatót a listából
+    delete itemToDelete; // Felszabadítjuk magát a memóriát
 }
 
-MenuItem* Restaurant::getMenuItemById(int id) const {
-    for (auto it = menu.begin(); it != menu.end(); ++it) {
-        if ((*it)->getId() == id) {
+void Restaurant::printMenu() const
+{
+    if (menu.getSize() == 0)
+    {
+        std::cout << "Az etlap jelenleg ures.\n";
+        return;
+    }
+    std::cout << "--- ELERHETO ETLAP ---\n\n";
+    for (auto it = menu.begin(); it != menu.end(); ++it)
+    {
+        (*it)->print(std::cout);
+    }
+    std::cout << "\n----------------------\n";
+}
+
+MenuItem *Restaurant::getMenuItemById(int id) const
+{
+    for (auto it = menu.begin(); it != menu.end(); ++it)
+    {
+        if ((*it)->getId() == id)
+        {
             return *it;
         }
     }
     return nullptr;
 }
 
-void Restaurant::addTable(int id, int seats, const std::string& desc, int x, int y) {
-    for (auto it = tables.begin(); it != tables.end(); ++it) {
-        if ((*it).getId() == id) {
+void Restaurant::addTable(int id, int seats, const std::string &desc, int x, int y)
+{
+    for (auto it = tables.begin(); it != tables.end(); ++it)
+    {
+        if (isTableIdTaken(id))
+        {
             throw std::invalid_argument("Ez az asztal ID mar letezik!");
         }
-        if ((*it).getX() == x && (*it).getY() == y) {
+        if (isTableAt(x, y))
+        {
             throw std::invalid_argument("Erre a koordinatara mar van asztal rogzitve!");
         }
     }
-    
+
     tables.push_back(Table(id, seats, desc, x, y));
+
+    nextTableId = std::max(nextTableId, id + 1);
 }
 
-Table* Restaurant::getTableById(int id) {
-    for (auto it = tables.begin(); it != tables.end(); ++it) {
-        if ((*it).getId() == id) {
+Table *Restaurant::getTableById(int id)
+{
+    for (auto it = tables.begin(); it != tables.end(); ++it)
+    {
+        if ((*it).getId() == id)
+        {
             return &(*it);
         }
     }
     return nullptr;
 }
 
-void Restaurant::loadData() {
+void Restaurant::deleteTable(int id)
+{
+    for (auto it = tables.begin(); it != tables.end(); ++it)
+    {
+        if ((*it).getId() == id)
+        {
+
+            // Biztonsági ellenőrzés: Van aktív rendelés az asztalon?
+            if ((*it).hasActiveOrder())
+            {
+                throw std::logic_error("Az asztal nem torolheto, mert epp aktiv rendelessel rendelkezik!");
+            }
+
+            // Ha nincs rendelés, az erase kiveszi a List-ből
+            tables.erase(it);
+            return;
+        }
+    }
+
+    throw std::invalid_argument("Nincs ilyen ID-ju asztal a rendszerben!");
+}
+
+bool Restaurant::isTableIdTaken(int id) const
+{
+    for (auto it = tables.begin(); it != tables.end(); ++it)
+    {
+        if ((*it).getId() == id)
+            return true;
+    }
+    return false;
+}
+
+bool Restaurant::isTableAt(int x, int y) const
+{
+    for (auto it = tables.begin(); it != tables.end(); ++it)
+    {
+        if ((*it).getX() == x && (*it).getY() == y)
+            return true;
+    }
+    return false;
+}
+
+void Restaurant::printTables() const
+{
+    if (tables.getSize() == 0)
+    {
+        std::cout << "Jelenleg nincsenek asztalok a rendszerben.\n";
+        return;
+    }
+
+    for (auto it = tables.begin(); it != tables.end(); ++it)
+    {
+        (*it).printTable(std::cout);
+        std::cout << "\n";
+    }
+}
+
+void Restaurant::loadData()
+{
     // 1. Étlap betöltése
     std::ifstream mFile(menuFile);
-    if (!mFile.is_open()) return;
+    if (!mFile.is_open())
+        return;
 
     std::string type;
-    
-    // A típust jelző karakter kiolvasása pontosvesszőig (pl. "E" vagy "I")
-    while (std::getline(mFile, type, ';')) {
-        
-        // Üres sorok és extra sortörések elleni védelem
-        if (type.length() > 0 && type[0] == '\n') type.erase(0, 1);
-        if (type.length() > 0 && type[0] == '\r') type.erase(0, 1);
-        if (type.empty()) continue;
 
-        MenuItem* item = nullptr;
+    // A típust jelző karakter kiolvasása pontosvesszőig (pl. "E" vagy "I")
+    while (std::getline(mFile, type, ';'))
+    {
+
+        // Üres sorok és extra sortörések elleni védelem
+        if (type.length() > 0 && type[0] == '\n')
+            type.erase(0, 1);
+        if (type.length() > 0 && type[0] == '\r')
+            type.erase(0, 1);
+        if (type.empty())
+            continue;
+
+        MenuItem *item = nullptr;
 
         // 1. Lépés: Példányosítás, típus alapján
-        if (type == "E") {
+        if (type == "E")
+        {
             item = new Food();
-        } else if (type == "I") {
+        }
+        else if (type == "I")
+        {
             item = new Drink();
         }
 
-        if (item != nullptr) {
-            // 2. Lépés: Az objektum beolvassa a saját maradék adatait a fájlból
-            item->read(mFile);
-            
-            // 3. Lépés: Hozzáadás a heterogén listához
-            addMenuItem(item);
-        } else {
+        if (item != nullptr)
+        {
+            try
+            {
+                // 2. Lépés: Az objektum beolvassa a saját maradék adatait a fájlból
+                item->read(mFile);
+
+                // 3. Lépés: Hozzáadás a heterogén listához
+                addMenuItem(item);
+            }
+            catch (const std::exception &)
+            {
+                delete item;
+            }
+        }
+        else
+        {
             // TODO: Hiba kiírása
             // Maradék sor olvasása a fájlból, hogy ne akadjon meg a következő iterációban
             std::string discard;
@@ -127,28 +240,34 @@ void Restaurant::loadData() {
         }
     }
     mFile.close();
-    
+
     // 2. Asztalok betöltése
     std::ifstream tFile(tablesFile);
-    if (tFile.is_open()) {
+    if (tFile.is_open())
+    {
         std::string line;
-        while (std::getline(tFile, line)) {
+        while (std::getline(tFile, line))
+        {
             trimCR(line);
-            if (line.empty()) continue;
+            if (line.empty())
+                continue;
 
             std::stringstream ss(line);
             std::string idStr, seatsStr, desc, xStr, yStr, occStr;
-            
+
             std::getline(ss, idStr, ';');
             std::getline(ss, seatsStr, ';');
             std::getline(ss, desc, ';');
             std::getline(ss, xStr, ';');
             std::getline(ss, yStr, ';');
             // A foglalt státuszt (occStr) felesleges beolvasni, mert az a rendelések betöltésével automatikusan be fog állítódni!
-            
-            try {
+
+            try
+            {
                 addTable(std::stoi(idStr), std::stoi(seatsStr), desc, std::stoi(xStr), std::stoi(yStr));
-            } catch (const std::exception& e) {
+            }
+            catch (const std::exception &e)
+            {
                 // Ha ütközés van, vagy hibás az adat, átlépjük
             }
         }
@@ -157,28 +276,32 @@ void Restaurant::loadData() {
 
     // 3. Rendelések betöltése
     std::ifstream oFile(ordersFile);
-    if (oFile.is_open()) {
+    if (oFile.is_open())
+    {
         std::string line;
-        while (std::getline(oFile, line)) {
+        while (std::getline(oFile, line))
+        {
             trimCR(line);
-            if (line.empty()) continue;
+            if (line.empty())
+                continue;
 
             std::stringstream ss(line);
             std::string tIdStr, mIdStr, qtyStr;
-            
+
             std::getline(ss, tIdStr, ';');
             std::getline(ss, mIdStr, ';');
             std::getline(ss, qtyStr, ';');
 
             int tId = std::stoi(tIdStr);
-            int mId = std::stoi(mIdStr); 
-            int qty = std::stoi(qtyStr); 
+            int mId = std::stoi(mIdStr);
+            int qty = std::stoi(qtyStr);
 
             // A memóriacímek megkeresése (Linking)
-            Table* t = getTableById(tId);
-            MenuItem* item = getMenuItemById(mId);
+            Table *t = getTableById(tId);
+            MenuItem *item = getMenuItemById(mId);
 
-            if (t != nullptr && item != nullptr) {
+            if (t != nullptr && item != nullptr)
+            {
                 t->openOrder(); // Biztosítjuk, hogy az asztal "Foglalt" legyen
                 t->addItemToOrder(item, qty);
             }
@@ -187,44 +310,58 @@ void Restaurant::loadData() {
     }
 }
 
-void Restaurant::saveData() const {
+void Restaurant::saveData() const
+{
     // 1. Étlap kimentése
     std::ofstream mFile(menuFile);
-    if (mFile.is_open()) {
-        for (auto it = menu.begin(); it != menu.end(); ++it) {
+    if (mFile.is_open())
+    {
+        for (auto it = menu.begin(); it != menu.end(); ++it)
+        {
             (*it)->save(mFile);
         }
         mFile.close();
-    } else {
+    }
+    else
+    {
         throw std::runtime_error("Nem sikerult megnyitni a menufajlt mentesre!");
     }
 
     // 2. Asztalok kimentése
     std::ofstream tFile(tablesFile);
-    if (tFile.is_open()) {
-        for (auto it = tables.begin(); it != tables.end(); ++it) {
+    if (tFile.is_open())
+    {
+        for (auto it = tables.begin(); it != tables.end(); ++it)
+        {
             // Formátum: ID;Férőhely;Leírás;X;Y;Foglalt-e
-            tFile << (*it).getId() << ";" 
-                  << (*it).getSeats() << ";" 
-                  << (*it).getDescription() << ";" 
-                  << (*it).getX() << ";" 
-                  << (*it).getY() << ";" 
+            tFile << (*it).getId() << ";"
+                  << (*it).getSeats() << ";"
+                  << (*it).getDescription() << ";"
+                  << (*it).getX() << ";"
+                  << (*it).getY() << ";"
                   << (*it).isOccupied() << "\n";
         }
         tFile.close();
-    } else {
+    }
+    else
+    {
         throw std::runtime_error("Nem sikerult megnyitni az asztalfajlt mentesre!");
     }
 
     // 3. Rendelések kimentése (Csak az aktív rendelések)
     std::ofstream oFile(ordersFile);
-    if (oFile.is_open()) {
-        for (auto it = tables.begin(); it != tables.end(); ++it) {
-            if ((*it).hasActiveOrder()) {
-                Order* order = (*it).getOrder();
+    if (oFile.is_open())
+    {
+        for (auto it = tables.begin(); it != tables.end(); ++it)
+        {
+            if ((*it).hasActiveOrder())
+            {
+                Order *order = (*it).getOrder();
                 // Végigmegyünk az asztal rendelésének tételein
-                for (const auto& orderItem : order->getItems()) {
-                    if (orderItem.getItem() != nullptr) {
+                for (const auto &orderItem : order->getItems())
+                {
+                    if (orderItem.getItem() != nullptr)
+                    {
                         // Formátum: AsztalID;ÉtelID;Darab
                         oFile << (*it).getId() << ";"
                               << orderItem.getItem()->getId() << ";"
@@ -234,13 +371,17 @@ void Restaurant::saveData() const {
             }
         }
         oFile.close();
-    } else {
+    }
+    else
+    {
         throw std::runtime_error("Nem sikerult megnyitni a rendelesfajlt mentesre!");
     }
 }
 
-void Restaurant::showOccupancyMap() const {
-    if (tables.getSize() == 0) {
+void Restaurant::showOccupancyMap() const
+{
+    if (tables.getSize() == 0)
+    {
         std::cout << "Jelenleg nincsenek asztalok az etteremben.\n";
         return;
     }
@@ -248,7 +389,7 @@ void Restaurant::showOccupancyMap() const {
     // 1. A C-s projektből áthozott konstans méretek (15x10)
     const int REST_SIZE_X = 15;
     const int REST_SIZE_Y = 10;
-    
+
     // 2. ANSI Színkódok (a régi getColorCode() logikája alapján)
     const std::string COLOR_RED = "\x1b[31m";
     const std::string COLOR_GREEN = "\x1b[32m";
@@ -257,34 +398,42 @@ void Restaurant::showOccupancyMap() const {
     std::cout << "\n=== FOGLALTSAGI TERKEP ===\n\n";
 
     // 3. A rács kirajzolása (Y és X koordináták szerint)
-    for (int y = 0; y <= REST_SIZE_Y; y++) {
-        for (int x = 0; x <= REST_SIZE_X; x++) {
-            
+    for (int y = 0; y <= REST_SIZE_Y; y++)
+    {
+        for (int x = 0; x <= REST_SIZE_X; x++)
+        {
+
             bool foundTable = false;
-            
+
             // Megnézzük, van-e asztal ezen a koordinátán
-            for (auto it = tables.begin(); it != tables.end(); ++it) {
-                if ((*it).getX() == x && (*it).getY() == y) {
-                    
+            for (auto it = tables.begin(); it != tables.end(); ++it)
+            {
+                if ((*it).getX() == x && (*it).getY() == y)
+                {
+
                     // Szín beállítása foglaltság alapján
-                    if ((*it).isOccupied()) {
-                        std::cout << COLOR_RED; 
-                    } else {
+                    if ((*it).isOccupied())
+                    {
+                        std::cout << COLOR_RED;
+                    }
+                    else
+                    {
                         std::cout << COLOR_GREEN;
                     }
-                    
+
                     // Azonosító kiírása mindig 2 karakter hosszan (pl. [01], [12])
-                    std::cout << "[" 
-                              << std::setw(2) << std::setfill('0') << (*it).getId() 
+                    std::cout << "["
+                              << std::setw(2) << std::setfill('0') << (*it).getId()
                               << "]" << COLOR_RESET;
-                              
+
                     foundTable = true;
-                    break; 
+                    break;
                 }
             }
 
             // Ha nem volt asztal, a C-s kód " .. " mintáját rajzoljuk
-            if (!foundTable) {
+            if (!foundTable)
+            {
                 std::cout << " .. ";
             }
         }
@@ -292,7 +441,7 @@ void Restaurant::showOccupancyMap() const {
     }
 
     std::cout << "==========================\n";
-    std::cout << "Jelmagyarazat: " 
-              << COLOR_GREEN << "[01]" << COLOR_RESET << " = Szabad, " 
+    std::cout << "Jelmagyarazat: "
+              << COLOR_GREEN << "[01]" << COLOR_RESET << " = Szabad, "
               << COLOR_RED << "[01]" << COLOR_RESET << " = Foglalt\n";
 }

@@ -1,99 +1,81 @@
 #ifndef UI_HPP
 #define UI_HPP
 
-#include <iostream>
 #include <string>
 #include <vector>
-#include <sstream>
+#include "restaurant.hpp"
+#include "table.hpp"
 
-// 1. Üzenettípusok a színezéshez (mint a C-s kódodban)
-enum class MsgType { SUCCESS, ERROR, WARNING, INFO, NONE };
+enum class MsgType
+{
+    SUCCESS,
+    ERROR,
+    WARNING,
+    INFO,
+    NONE
+};
 
-class UI {
+class UI
+{
 private:
-    // ANSI Színkódok
-    static constexpr const char* COLOR_SUCCESS = "\x1b[32m";
-    static constexpr const char* COLOR_ERROR   = "\x1b[31m";
-    static constexpr const char* COLOR_WARNING = "\x1b[33m";
-    static constexpr const char* COLOR_INFO    = "\x1b[34m";
-    static constexpr const char* COLOR_RESET   = "\x1b[0m";
+    Restaurant &restaurant; // Referencia a központi modellre
+    std::string flashMessage;
+    MsgType flashType;
 
+    // ANSI Színkódok
+    static constexpr const char *COLOR_SUCCESS = "\x1b[32m";
+    static constexpr const char *COLOR_ERROR = "\x1b[31m";
+    static constexpr const char *COLOR_WARNING = "\x1b[33m";
+    static constexpr const char *COLOR_INFO = "\x1b[34m";
+    static constexpr const char *COLOR_RESET = "\x1b[0m";
     static constexpr int HEADER_LENGTH = 50;
 
-    // Segédfüggvény az automatikus sortöréshez (Word Wrap)
-    static std::vector<std::string> wordWrap(const std::string& text, int maxWidth) {
-        std::vector<std::string> lines;
-        std::istringstream words(text);
-        std::string word;
-        std::string currentLine;
+    int getIntInput(const std::string &prompt);
+    double getDoubleInput(const std::string &prompt);
+    std::string getStringInput(const std::string &prompt);
 
-        while (words >> word) {
-            if (currentLine.empty()) {
-                currentLine = word;
-            } else if (currentLine.length() + 1 + word.length() <= (size_t)maxWidth) {
-                currentLine += " " + word; // Még odafér a sorba
-            } else {
-                lines.push_back(currentLine); // Sor vége, új sor kezdése
-                currentLine = word;
-            }
-        }
-        if (!currentLine.empty()) {
-            lines.push_back(currentLine);
-        }
-        return lines;
-    }
+    // Helper input validators
+    std::string askValidatedName(const std::string &prompt);
+    int askValidatedPrice(const std::string &prompt);
+    double askValidatedVolume(const std::string &prompt);
+    bool askYesNo(const std::string &prompt);
+
+    void printFlashMessage();
+    void consoleClear();
+
+    // Asztal menedzsment
+    void tableMenu();
+    void addTableMenu();
+    void modifyTableMenu();
+    void deleteTableMenu();
+
+    // Asztal menedzsment helper függvények
+    int getValidatedCoordinate(const std::string &axis, int maxValue);
+    int getValidatedSeats(int minSeats);
+    Table *selectTableById();
+    std::pair<int, int> getValidatedTablePosition(int excludeTableId = -1);
+
+    // Étlap menedzsment
+    void menuMenu();
+    void viewMenuMenu();
+    void addMenuItemMenu();
+    void modifyMenuItemMenu();
+    void deleteMenuItemMenu();
+
+    MenuItem *selectMenuItemById();
+
+    // Rendelés menedzsment
+    void orderMenu();
+
+    static std::vector<std::string> wordWrap(const std::string &text, int maxWidth);
 
 public:
-    // A régi printMsgBox C++-os megfelelője
-    static void printMsgBox(const std::string& msg, MsgType type = MsgType::NONE) {
-        if (msg.empty()) return;
+    UI(Restaurant &r);
 
-        const int maxContentWidth = HEADER_LENGTH - 4; // Levonjuk a "| " és " |" szélességét
+    void run();
 
-        // Szín kiválasztása
-        std::string color;
-        switch(type) {
-            case MsgType::SUCCESS: color = COLOR_SUCCESS; break;
-            case MsgType::ERROR:   color = COLOR_ERROR; break;
-            case MsgType::WARNING: color = COLOR_WARNING; break;
-            case MsgType::INFO:    color = COLOR_INFO; break;
-            default: color = COLOR_RESET; break;
-        }
-
-        std::string border(HEADER_LENGTH, '=');
-
-        // Felső keret kirajzolása színnel
-        std::cout << "\n" << color << border << "\n";
-
-        // Szöveg darabolása, ha túl hosszú
-        std::vector<std::string> lines = wordWrap(msg, maxContentWidth);
-
-        // Sorok középre igazítása és kiírása
-        for (const std::string& line : lines) {
-            int padLeft = (maxContentWidth - line.length()) / 2;
-            int padRight = maxContentWidth - line.length() - padLeft;
-
-            std::cout << "| " 
-                      << std::string(padLeft, ' ') 
-                      << line 
-                      << std::string(padRight, ' ') 
-                      << " |\n";
-        }
-
-        // Alsó keret és szín visszaállítása
-        std::cout << border << COLOR_RESET << "\n";
-    }
-
-    // Enterre várás (opcionális, de jó ha van a képernyőtörlés előtt)
-    static void pause() {
-        std::cout << "(Nyomj ENTER-t a folytatashoz...)\n";
-        std::cin.clear();
-        // Ha maradt sortörés a pufferben, kidobjuk
-        if (std::cin.rdbuf()->in_avail() > 0) {
-            std::cin.ignore(10000, '\n'); 
-        }
-        std::cin.get();
-    }
+    static void printMsgBox(const std::string &msg, MsgType type = MsgType::NONE);
+    static void pause();
 };
 
 #endif // UI_HPP
