@@ -19,6 +19,11 @@ bool Drink::getIsAlcoholic() const
     return isAlcoholic;
 }
 
+double Drink::getVolume() const
+{
+    return volume;
+}
+
 void Drink::setVolume(double volume)
 {
     validateVolume(volume);

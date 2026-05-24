@@ -10,6 +10,31 @@ add_compile_options(-Wall -Wextra -pedantic -g -DMEMTRACE)
 
 include_directories(include)
 
-file(GLOB SOURCES "src/*.cpp")
+add_executable(etterem_nhf 
+    src/main.cpp
+    src/restaurant.cpp
+    src/table.cpp
+    src/order.cpp
+    src/orderitem.cpp
+    src/menuitem.cpp
+    src/food.cpp
+    src/drink.cpp
+    src/ui.cpp 
+    src/memtrace.cpp
+)
 
-add_executable(etterem_nhf ${SOURCES})
+# Tesztelő program
+add_executable(etterem_tesztek
+    src/tests.cpp
+    src/restaurant.cpp
+    src/table.cpp
+    src/order.cpp
+    src/orderitem.cpp
+    src/menuitem.cpp
+    src/food.cpp
+    src/drink.cpp
+    src/ui.cpp 
+    src/memtrace.cpp
+)
+
+target_include_directories(etterem_tesztek PRIVATE include)

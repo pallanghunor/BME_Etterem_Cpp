@@ -40,6 +40,11 @@ public:
     bool getIsAlcoholic() const;
 
     /**
+     * @brief Visszaadja az ital űrtartalmát.
+     */
+    double getVolume() const;
+
+    /**
      * @brief Beállítja az ital űrtartalmát.
      */
     void setVolume(double volume);
