@@ -26,8 +26,8 @@ private:
     /**
      * @brief A perzisztenciához használt fájlnevek.
      */
-    const std::string tablesFile = "asztalok.txt";
-    const std::string menuFile = "etelek.txt";
+    const std::string tablesFile = "tables.txt";
+    const std::string menuFile = "menu.txt";
     const std::string ordersFile = "orders.txt";
 
     static constexpr int MAX_X = 15;

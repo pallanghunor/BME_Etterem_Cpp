@@ -1025,7 +1025,7 @@ void UI::orderMenu()
 
                     // 2. Sorszám beolvasása a segédfájlból
                     int nextSeq = 1;
-                    std::string counterFileName = "szamla_counter.txt";
+                    std::string counterFileName = "receipt_counter.txt";
                     std::ifstream counterIn(counterFileName);
                     if (counterIn.is_open())
                     {
@@ -1050,7 +1050,14 @@ void UI::orderMenu()
                     }
 
                     // 4. A végső fájlnév összerakása
-                    std::string finalFilename = "szamlak/szamla_" + todayStr + "_" + std::to_string(nextSeq) + ".txt";
+                    std::string finalFilename = "receipts/receipt_" + todayStr + "_" + std::to_string(nextSeq) + ".txt";
+
+                    // 4.5. Receipts mappa létrehozása ha nem létezik (Windows és Linux kompatibilis)
+#ifdef _WIN32
+                    _mkdir("receipts");
+#else
+                    mkdir("receipts", 0755);
+#endif
 
                     // 5. Fájl megnyitása és asztal lezárása
                     std::ofstream outFile(finalFilename);
