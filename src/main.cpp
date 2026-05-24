@@ -8,13 +8,14 @@
 
 #include "memtrace.h"
 
-int main() {
+int main()
+{
     Restaurant bmeEtterem;
-    
+
     bmeEtterem.loadData();
 
     UI ui(bmeEtterem);
-    
+
     ui.run();
 
     return 0;

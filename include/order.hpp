@@ -13,50 +13,51 @@
 /**
  * @brief Egy asztal rendelt tételeit tároló konténer.
  */
-class Order {
+class Order
+{
 private:
     List<OrderItem> items;
 
 public:
     /**
-    * @brief Üres rendelés létrehozása.
+     * @brief Üres rendelés létrehozása.
      */
     Order() {};
 
     /**
-    * @brief Tétel hozzáadása a rendeléshez.
+     * @brief Tétel hozzáadása a rendeléshez.
      */
-    void addItem(MenuItem* item, int qty);
+    void addItem(MenuItem *item, int qty);
 
     /**
-    * @brief Tétel eltávolítása a rendelésből.
+     * @brief Tétel eltávolítása a rendelésből.
      */
-    void removeItem(MenuItem* item);
+    void removeItem(MenuItem *item);
 
     /**
-    * @brief Egy tétel mennyiségének módosítása.
+     * @brief Egy tétel mennyiségének módosítása.
      */
-    void updateItemQuantity(MenuItem* item, int newQty);
+    void updateItemQuantity(MenuItem *item, int newQty);
 
     /**
-    * @brief Visszaadja, hogy az adott tétel szerepel-e már a rendelésben.
+     * @brief Visszaadja, hogy az adott tétel szerepel-e már a rendelésben.
      */
-    bool containsItem(MenuItem* item) const;
+    bool containsItem(MenuItem *item) const;
 
     /**
-    * @brief Visszaadja a rendelés végösszegét.
+     * @brief Visszaadja a rendelés végösszegét.
      */
     int getTotal() const;
 
     /**
-    * @brief Formázott blokkot nyomtat a nyugtáról.
+     * @brief Formázott blokkot nyomtat a nyugtáról.
      */
-    void printReceipt(std::ostream& os) const;
+    void printReceipt(std::ostream &os) const;
 
     /**
-    * @brief Visszaadja a tárolt rendelési tételeket.
+     * @brief Visszaadja a tárolt rendelési tételeket.
      */
-    const List<OrderItem>& getItems() const;
+    const List<OrderItem> &getItems() const;
 };
 
 #endif // ORDER_HPP

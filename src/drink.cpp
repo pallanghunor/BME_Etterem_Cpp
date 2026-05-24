@@ -80,6 +80,7 @@ void Drink::read(std::istream &is)
     isAlcoholic = std::stoi(temp);
 }
 
-void Drink::accept(MenuItemVisitor& visitor) {
-    visitor.visitDrink(this); 
+void Drink::accept(MenuItemVisitor &visitor)
+{
+    visitor.visitDrink(this);
 }

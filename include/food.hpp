@@ -12,55 +12,56 @@
 /**
  * @brief Ételt reprezentáló menüpont.
  */
-class Food : public MenuItem {
+class Food : public MenuItem
+{
 private:
     std::string allergens;
 
 public:
     /**
-    * @brief Üres étel elem létrehozása.
+     * @brief Üres étel elem létrehozása.
      */
     Food() = default;
 
     /**
-    * @brief Étel létrehozása a megadott tulajdonságokkal.
-    * @param id Egyedi azonosító.
-    * @param name Tétel neve.
-    * @param price Ar forintban.
-    * @param available Elérhetőségi jelző.
-    * @param allergens Allergének listája.
+     * @brief Étel létrehozása a megadott tulajdonságokkal.
+     * @param id Egyedi azonosító.
+     * @param name Tétel neve.
+     * @param price Ar forintban.
+     * @param available Elérhetőségi jelző.
+     * @param allergens Allergének listája.
      */
-    Food(int id, const std::string& name, int price, bool available, const std::string& allergens);
-    
-    /**
-    * @brief Beállítja az allergének szövegét.
-     */
-    void setAllergens(const std::string& allergens);
+    Food(int id, const std::string &name, int price, bool available, const std::string &allergens);
 
     /**
-    * @brief Kiírja az ételt emberi olvasásra alkalmas formában.
+     * @brief Beállítja az allergének szövegét.
      */
-    void print(std::ostream& os) const override;
+    void setAllergens(const std::string &allergens);
 
     /**
-    * @brief Elmenti az ételt szöveges folyamra.
+     * @brief Kiírja az ételt emberi olvasásra alkalmas formában.
      */
-    void save(std::ostream& os) const override;
+    void print(std::ostream &os) const override;
 
     /**
-    * @brief Lényegileg új példányt készít az ételről.
+     * @brief Elmenti az ételt szöveges folyamra.
      */
-    MenuItem* clone() const override;
+    void save(std::ostream &os) const override;
 
     /**
-    * @brief Beolvassa az ételt szöveges folyamról.
+     * @brief Lényegileg új példányt készít az ételről.
      */
-    void read(std::istream& is) override;
+    MenuItem *clone() const override;
 
     /**
-    * @brief Fogadja a menüpont-visitor objektumot.
+     * @brief Beolvassa az ételt szöveges folyamról.
      */
-    void accept(MenuItemVisitor& visitor) override;
+    void read(std::istream &is) override;
+
+    /**
+     * @brief Fogadja a menüpont-visitor objektumot.
+     */
+    void accept(MenuItemVisitor &visitor) override;
 };
 
 #endif // FOOD_HPP

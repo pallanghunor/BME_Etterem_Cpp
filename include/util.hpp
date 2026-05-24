@@ -11,8 +11,10 @@
 /**
  * @brief Leszedi a sorvégi carriage return karaktert, ha van.
  */
-inline void trimCR(std::string& str) {
-    if (!str.empty() && str.back() == '\r') {
+inline void trimCR(std::string &str)
+{
+    if (!str.empty() && str.back() == '\r')
+    {
         str.pop_back();
     }
 }

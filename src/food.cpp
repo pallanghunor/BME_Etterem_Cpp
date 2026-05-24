@@ -10,11 +10,13 @@
 
 Food::Food(int id, const std::string &name, int price, bool available, const std::string &allergens) : MenuItem(id, name, price, available), allergens(allergens) {}
 
-void Food::setAllergens(const std::string& allergens) {
+void Food::setAllergens(const std::string &allergens)
+{
     this->allergens = allergens;
 }
 
-void Food::print(std::ostream &os) const{
+void Food::print(std::ostream &os) const
+{
     os << "[ID: " << id << "] [Etel] " << name << " | Ar: " << price << " Ft | Allergenek: " << allergens;
     if (!available)
         os << " (Nincs keszleten)";
@@ -56,6 +58,7 @@ void Food::read(std::istream &is)
     trimCR(allergens); // Jporta \r levágása
 }
 
-void Food::accept(MenuItemVisitor& visitor) {
-    visitor.visitFood(this); 
+void Food::accept(MenuItemVisitor &visitor)
+{
+    visitor.visitFood(this);
 }

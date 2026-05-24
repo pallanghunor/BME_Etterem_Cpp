@@ -17,7 +17,7 @@ class List
 {
 private:
     /**
-    * @brief Belső csomópont típus, kívülről nem látható.
+     * @brief Belső csomópont típus, kívülről nem látható.
      */
     struct Node
     {
@@ -35,7 +35,7 @@ private:
 
 public:
     /**
-    * @brief Módosítható iterator a Listhez.
+     * @brief Módosítható iterator a Listhez.
      */
     class Iterator
     {
@@ -88,59 +88,65 @@ public:
     };
 
     /**
-    * @brief Csak olvasható iterator a Listhez.
+     * @brief Csak olvasható iterator a Listhez.
      */
-    class ConstIterator {
+    class ConstIterator
+    {
     private:
-        const Node* current;
+        const Node *current;
         /**
          * @brief Lehetővé teszi, hogy a List hozzáférjen az iterator belsejéhez.
          */
-        friend class List<T>; 
+        friend class List<T>;
 
     public:
         /**
          * @brief Konstans iterator létrehozása egy csomópontmutatóból.
          */
-        ConstIterator(const Node* node = nullptr) : current(node) {}
+        ConstIterator(const Node *node = nullptr) : current(node) {}
 
         /**
          * @brief Az iterator dereferenciálása.
          */
-        const T& operator*() const {
+        const T &operator*() const
+        {
             return current->data;
         }
 
         /**
          * @brief Átlép a következő csomópontra.
          */
-        ConstIterator& operator++() {
-            if (current) current = current->next;
+        ConstIterator &operator++()
+        {
+            if (current)
+                current = current->next;
             return *this;
         }
 
         /**
          * @brief Két iterator egyenlőségének vizsgálata.
          */
-        bool operator==(const ConstIterator& other) const {
+        bool operator==(const ConstIterator &other) const
+        {
             return current == other.current;
         }
 
         /**
          * @brief Két iterator különbözőségének vizsgálata.
          */
-        bool operator!=(const ConstIterator& other) const {
+        bool operator!=(const ConstIterator &other) const
+        {
             return current != other.current;
         }
     };
 
     /**
-    * @brief Üres lista létrehozása.
+     * @brief Üres lista létrehozása.
      */
     List() : head(nullptr), tail(nullptr), count(0) {}
 
     /**
-    * @brief Megsemmisíti a listát és felszabadít minden csomópontot.
+     * @brief Megsemmisíti a listát és felszabadít minden csomópontot.
      */
     ~List()
     {
@@ -148,7 +154,7 @@ public:
     }
 
     /**
-    * @brief Másoló konstruktor, amely mély másolatot készít.
+     * @brief Másoló konstruktor, amely mély másolatot készít.
      */
     List(const List<T> &other) : head(nullptr), tail(nullptr), count(0)
     {
@@ -159,7 +165,7 @@ public:
     }
 
     /**
-    * @brief Értékadó operátor, amely mély másolatot készít.
+     * @brief Értékadó operátor, amely mély másolatot készít.
      */
     List<T> &operator=(const List<T> &other)
     {
@@ -175,7 +181,7 @@ public:
     }
 
     /**
-    * @brief Elem hozzáfűzése a lista végére.
+     * @brief Elem hozzáfűzése a lista végére.
      */
     void push_back(const T &item)
     {
@@ -193,7 +199,7 @@ public:
     }
 
     /**
-    * @brief Törli az iterator által mutatott elemet.
+     * @brief Törli az iterator által mutatott elemet.
      */
     void erase(Iterator it)
     {
@@ -224,7 +230,7 @@ public:
     }
 
     /**
-    * @brief Töröl minden elemet a listából.
+     * @brief Töröl minden elemet a listából.
      */
     void clear()
     {
@@ -241,7 +247,7 @@ public:
     }
 
     /**
-    * @brief Visszaadja a tárolt elemek számát.
+     * @brief Visszaadja a tárolt elemek számát.
      */
     size_t getSize() const
     {
@@ -249,27 +255,27 @@ public:
     }
 
     /**
-    * @brief Iterator az első elemre.
+     * @brief Iterator az első elemre.
      */
     Iterator begin() { return Iterator(head); }
 
     /**
-    * @brief Az end iterator visszaadása.
+     * @brief Az end iterator visszaadása.
      */
     Iterator end() { return Iterator(nullptr); }
 
     /**
-    * @brief Konstans iterator az első elemre.
+     * @brief Konstans iterator az első elemre.
      */
     ConstIterator begin() const { return ConstIterator(head); }
 
     /**
-    * @brief A konstans end iterator visszaadása.
+     * @brief A konstans end iterator visszaadása.
      */
     ConstIterator end() const { return ConstIterator(nullptr); }
 
     /**
-    * @brief Visszaadja az adott indexű elemet.
+     * @brief Visszaadja az adott indexű elemet.
      */
     T &operator[](size_t index)
     {
@@ -286,7 +292,7 @@ public:
     }
 
     /**
-    * @brief Visszaadja az adott indexű elemet.
+     * @brief Visszaadja az adott indexű elemet.
      */
     const T &operator[](size_t index) const
     {
