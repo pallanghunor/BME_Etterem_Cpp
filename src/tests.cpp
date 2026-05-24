@@ -165,7 +165,7 @@ int main() {
         EXPECT_THROW(r.deleteMenuItem(99), std::invalid_argument&);
     } ENDM
 
-    // 12. A BIZTONSÁGI FŐTESZT: Tétel törlésének megakadályozása aktív rendelésnél
+    // 12. Tétel törlésének megakadályozása aktív rendelésnél
     TEST(RestaurantTest, DeleteItemInActiveOrder) {
         Restaurant r;
         
@@ -180,7 +180,7 @@ int main() {
         t->addItemToOrder(f, 2);
 
         // 3. Megpróbáljuk törölni az étlapból a tételt. 
-        // A programnak std::logic_error kivétellel MEG KELL TAGADNIA a törlést!
+        // A programnak std::logic_error kivétellel kell reagálnia, mert a tétel egy aktív rendelésben szerepel.
         EXPECT_THROW(r.deleteMenuItem(1), std::logic_error&);
     } ENDM
 
