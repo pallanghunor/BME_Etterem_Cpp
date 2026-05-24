@@ -1,3 +1,8 @@
+/**
+ * @file table.cpp
+ * @brief Asztal modell megvalósítás.
+ */
+
 #include "table.hpp"
 #include <stdexcept>
 

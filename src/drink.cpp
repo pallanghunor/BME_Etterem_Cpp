@@ -1,3 +1,8 @@
+/**
+ * @file drink.cpp
+ * @brief Ital menüpont megvalósítás.
+ */
+
 #include "drink.hpp"
 #include "util.hpp"
 #include <stdexcept>

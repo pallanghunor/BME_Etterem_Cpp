@@ -1,3 +1,8 @@
+/**
+ * @file food.cpp
+ * @brief Étel menüpont megvalósítás.
+ */
+
 #include "food.hpp"
 #include "util.hpp"
 

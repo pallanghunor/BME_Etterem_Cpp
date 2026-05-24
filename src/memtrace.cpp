@@ -1,3 +1,8 @@
+/**
+ * @file memtrace.cpp
+ * @brief Memóriakezelés-ellenőrző implementáció.
+ */
+
 /*********************************
 Memoriaszivargas-detektor
 Keszitette: Peregi Tamas, BME IIT, 2011

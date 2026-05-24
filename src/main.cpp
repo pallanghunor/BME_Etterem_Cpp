@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * @brief Az alkalmazás belépési pontja.
+ */
+
 #include "restaurant.hpp"
 #include "ui.hpp"
 

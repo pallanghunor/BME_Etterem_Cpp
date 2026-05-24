@@ -1,3 +1,8 @@
+/**
+ * @file restaurant.cpp
+ * @brief Az étterem fő modelljének megvalósítás.
+ */
+
 #include "restaurant.hpp"
 #include "food.hpp"
 #include "drink.hpp"

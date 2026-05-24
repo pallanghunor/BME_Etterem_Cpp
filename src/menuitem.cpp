@@ -1,3 +1,8 @@
+/**
+ * @file menuitem.cpp
+ * @brief Alap menü tétel megvalósítás.
+ */
+
 #include "menuitem.hpp"
 #include <stdexcept>
 

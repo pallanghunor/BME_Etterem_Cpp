@@ -1,3 +1,8 @@
+/**
+ * @file ui.cpp
+ * @brief Konzolos felhasználói felület megvalósítás.
+ */
+
 #include "ui.hpp"
 #include <iostream>
 #include <fstream>
@@ -1057,7 +1062,7 @@ void UI::orderMenu()
                     table->closeTable(outFile);
                     outFile.close();
 
-                    flashMessage = "Sikeres fizetes! Szamla: " + finalFilename;
+                    flashMessage = "Sikeres fizetes! Szamla kiallitva.";
                     flashType = MsgType::SUCCESS;
 
                     back = true;

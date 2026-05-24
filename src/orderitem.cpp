@@ -1,3 +1,8 @@
+/**
+ * @file orderitem.cpp
+ * @brief Rendelési tétel megvalósítás.
+ */
+
 #include "orderitem.hpp"
 
 #include "memtrace.h"
