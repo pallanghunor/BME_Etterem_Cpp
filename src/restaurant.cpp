@@ -196,10 +196,12 @@ void Restaurant::loadData()
         return;
 
     std::string type;
+    int lineNum = 0;
 
     // A típust jelző karakter kiolvasása pontosvesszőig (pl. "E" vagy "I")
     while (std::getline(mFile, type, ';'))
     {
+        lineNum++;
 
         // Üres sorok és extra sortörések elleni védelem
         if (type.length() > 0 && type[0] == '\n')
@@ -231,17 +233,23 @@ void Restaurant::loadData()
                 // 3. Lépés: Hozzáadás a heterogén listához
                 addMenuItem(item);
             }
-            catch (const std::exception &)
+            catch (const std::exception &e)
             {
+                std::cerr << "Hiba: Etlap elem beolvasasa sikertelen (sor " << lineNum << "):\\n"
+                          << "  Tipus: '" << type << "'\\n"
+                          << "  Oka: " << e.what() << std::endl;
                 delete item;
             }
         }
         else
         {
-            // TODO: Hiba kiírása
-            // Maradék sor olvasása a fájlból, hogy ne akadjon meg a következő iterációban
+            // Ismeretlen típus kezelése
             std::string discard;
             std::getline(mFile, discard);
+            std::cerr << "Hiba: Etlap elem beolvasasa sikertelen (sor " << lineNum << "):\\n"
+                      << "  Ismeretlen tipus: '" << type << "'\\n"
+                      << "  Elengedett adat: '" << discard << "'\\n"
+                      << "  Megjegyzes: Csak 'E' (etel) vagy 'I' (ital) tipusok ervenyek." << std::endl;
         }
     }
     mFile.close();
@@ -251,8 +259,10 @@ void Restaurant::loadData()
     if (tFile.is_open())
     {
         std::string line;
+        int lineNum = 0;
         while (std::getline(tFile, line))
         {
+            lineNum++;
             trimCR(line);
             if (line.empty())
                 continue;
@@ -265,7 +275,6 @@ void Restaurant::loadData()
             std::getline(ss, desc, ';');
             std::getline(ss, xStr, ';');
             std::getline(ss, yStr, ';');
-            // A foglalt státuszt (occStr) felesleges beolvasni, mert az a rendelések betöltésével automatikusan be fog állítódni!
 
             try
             {
@@ -273,7 +282,11 @@ void Restaurant::loadData()
             }
             catch (const std::exception &e)
             {
-                // Ha ütközés van, vagy hibás az adat, átlépjük
+                std::cerr << "Hiba: Asztal betoltese sikertelen (sor " << lineNum << "):\n"
+                          << "  Adat: \"" << line << "\"\n"
+                          << "  Mezo ertekek: ID=\"" << idStr << "\", Ferohelyek=\"" << seatsStr
+                          << "\", Leiras=\"" << desc << "\", X=\"" << xStr << "\", Y=\"" << yStr << "\"\n"
+                          << "  Oka: " << e.what() << std::endl;
             }
         }
         tFile.close();
@@ -284,8 +297,10 @@ void Restaurant::loadData()
     if (oFile.is_open())
     {
         std::string line;
+        int lineNum = 0;
         while (std::getline(oFile, line))
         {
+            lineNum++;
             trimCR(line);
             if (line.empty())
                 continue;
@@ -297,18 +312,39 @@ void Restaurant::loadData()
             std::getline(ss, mIdStr, ';');
             std::getline(ss, qtyStr, ';');
 
-            int tId = std::stoi(tIdStr);
-            int mId = std::stoi(mIdStr);
-            int qty = std::stoi(qtyStr);
-
-            // A memóriacímek megkeresése (Linking)
-            Table *t = getTableById(tId);
-            MenuItem *item = getMenuItemById(mId);
-
-            if (t != nullptr && item != nullptr)
+            try
             {
-                t->openOrder(); // Biztosítjuk, hogy az asztal "Foglalt" legyen
-                t->addItemToOrder(item, qty);
+                int tId = std::stoi(tIdStr);
+                int mId = std::stoi(mIdStr);
+                int qty = std::stoi(qtyStr);
+
+                // A memóriacímek megkeresése (Linking)
+                Table *t = getTableById(tId);
+                MenuItem *item = getMenuItemById(mId);
+
+                if (t != nullptr && item != nullptr)
+                {
+                    t->openOrder(); // Biztosítjuk, hogy az asztal "Foglalt" legyen
+                    t->addItemToOrder(item, qty);
+                }
+                else if (t == nullptr)
+                {
+                    std::cerr << "Figyelmeztetés: Asztal betöltése sikertelen (sor " << lineNum
+                              << "): Asztal ID \"" << tIdStr << "\" nem található." << std::endl;
+                }
+                else if (item == nullptr)
+                {
+                    std::cerr << "Figyelmeztetés: Rendelés tétel betöltése sikertelen (sor " << lineNum
+                              << "): Étlap elem ID \"" << mIdStr << "\" nem található." << std::endl;
+                }
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Hiba: Rendelés betöltése sikertelen (sor " << lineNum << "):\n"
+                          << "  Adat: \"" << line << "\"\n"
+                          << "  Mező értékek: AsztalID=\"" << tIdStr << "\", ÉtelID=\"" << mIdStr
+                          << "\", Darab=\"" << qtyStr << "\"\n"
+                          << "  Oka: " << e.what() << std::endl;
             }
         }
         oFile.close();

@@ -38,7 +38,7 @@ void Food::read(std::istream &is)
 {
     std::string temp;
 
-    // ID beolvasása (pontosvesszőig)
+    // ID beolvasása
     std::getline(is, temp, ';');
     id = std::stoi(temp);
 
@@ -53,7 +53,7 @@ void Food::read(std::istream &is)
     std::getline(is, temp, ';');
     available = std::stoi(temp);
 
-    // Allergének (Ez a sor VÉGE, itt már nem pontosvesszőig, hanem újsorig olvasunk!)
+    // Allergének
     std::getline(is, allergens);
     trimCR(allergens); // Jporta \r levágása
 }
