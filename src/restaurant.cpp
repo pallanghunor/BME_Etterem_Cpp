@@ -141,6 +141,11 @@ void Restaurant::deleteTable(int id)
                 throw std::logic_error("Az asztal nem torolheto, mert epp aktiv rendelessel rendelkezik!");
             }
 
+            if ((*it).isOccupied())
+            {
+                throw std::logic_error("Az asztal nem torolheto, mert epp foglalt!");
+            }
+
             // Ha nincs rendelés, az erase kiveszi a List-ből
             tables.erase(it);
             return;

@@ -580,9 +580,6 @@ void UI::addMenuItemMenu()
     }
 }
 
-// ============================================================================
-// ÚJ: MODIFIVISITOR IMPLEMENTÁCIÓ (Összeköti az objektumot a UI almenükkel)
-// ============================================================================
 void UI::ModifyVisitor::visitFood(Food *food)
 {
     ui.modifyFoodInteractive(food);
@@ -593,9 +590,6 @@ void UI::ModifyVisitor::visitDrink(Drink *drink)
     ui.modifyDrinkInteractive(drink);
 }
 
-// ============================================================================
-// A MEGÚJULT FŐ MÓDOSÍTÓ MENÜ (Tiszta polimorfizmus, nincs cast!)
-// ============================================================================
 void UI::modifyMenuItemMenu()
 {
     MenuItem *item = selectMenuItemById();
@@ -604,15 +598,11 @@ void UI::modifyMenuItemMenu()
         return; // Visszalépés, ha nem választott érvényes tételt
     }
 
-    // Elküldjük a látogatót. Az objektum (Food vagy Drink) magától tudja,
-    // melyik visit függvényt kell visszahívnia a típusának megfelelően!
+    // Elküldjük a látogatót. Az objektum (Food vagy Drink) magától tudja, melyik visit függvényt kell visszahívnia a típusának megfelelően!
     ModifyVisitor visitor(*this);
     item->accept(visitor);
 }
 
-// ============================================================================
-// KÜLÖNVÁLASZTOTT, TÍPUSSZPECIFIKUS INTERAKTÍV ALMENÜK
-// ============================================================================
 
 void UI::modifyFoodInteractive(Food *food)
 {
@@ -1171,11 +1161,9 @@ void UI::printMsgBox(const std::string &msg, MsgType type)
 // "Nyomj ENTER-t a folytatáshoz..." üzenet megjelenítése és várakozás ENTER-re
 void UI::pause()
 {
-#ifndef CPORTA
     std::cout << "(Nyomj ENTER-t a folytatashoz...)\n";
     std::cin.clear();
     std::cin.get();
-#endif
 }
 
 // --- Helper input validator implementations ---
