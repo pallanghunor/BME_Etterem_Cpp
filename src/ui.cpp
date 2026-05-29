@@ -787,8 +787,6 @@ void UI::orderMenu()
         Table *table = selectTableById();
         if (table == nullptr)
         {
-            // A helper nullptr-t ad vissza akkor is, ha hibas az ID.
-            // Csak akkor lepunk vissza, ha nincs hibauzenet (0: vissza).
             if (!flashMessage.empty() && flashType == MsgType::ERROR)
             {
                 continue;
@@ -826,261 +824,25 @@ void UI::orderMenu()
             switch (orderChoice)
             {
             case 1:
-            {
-                consoleClear();
-                Order *order = table->getOrder();
-
-                std::cout << "--- AKTIV RENDELES (ASZTAL ID: " << table->getId() << ") ---\n\n";
-
-                if (order == nullptr)
-                {
-                    flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
-                    flashType = MsgType::INFO;
-                    break;
-                }
-
-                const List<OrderItem> &items = order->getItems();
-                if (items.getSize() == 0)
-                {
-                    flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
-                    flashType = MsgType::INFO;
-                    break;
-                }
-
-                std::cout << "Tetelnev | Darab | Reszosszeg\n";
-                std::cout << "--------------------------------\n";
-                for (const auto &orderItem : items)
-                {
-                    MenuItem *item = orderItem.getItem();
-                    if (item != nullptr)
-                    {
-                        std::cout << item->getName() << " | "
-                                  << orderItem.getQuantity() << " db | "
-                                  << orderItem.getSubtotal() << " Ft\n";
-                    }
-                }
-                std::cout << "--------------------------------\n";
-                std::cout << "Eddigi vegosszeg: " << order->getTotal() << " Ft\n";
-                pause();
+                displayOrder(table);
                 break;
-            }
 
             case 2:
-            {
-                Order *order = table->getOrder();
-                if (order == nullptr)
-                {
-                    table->openOrder();
-                }
-
-                MenuItem *item = selectMenuItemById();
-                if (item == nullptr)
-                {
-                    if (!flashMessage.empty() && flashType == MsgType::ERROR)
-                    {
-                        break;
-                    }
-                    break;
-                }
-
-                int quantity = 0;
-                while (quantity <= 0)
-                {
-                    quantity = getIntInput("Darabszam: ");
-                    if (quantity <= 0)
-                    {
-                        std::cout << COLOR_ERROR << "Hiba: a darabszamnak nagyobbnak kell lennie 0-nal!\n"
-                                  << COLOR_RESET;
-                    }
-                }
-
-                try
-                {
-                    table->addItemToOrder(item, quantity);
-                    flashMessage = "Tetel sikeresen hozzaadva a rendeleshez.";
-                    flashType = MsgType::SUCCESS;
-                }
-                catch (const std::exception &e)
-                {
-                    flashMessage = std::string("Sikertelen hozzaadas: ") + e.what();
-                    flashType = MsgType::ERROR;
-                }
+                addItemToOrderInteractive(table);
                 break;
-            }
 
             case 3:
-            {
-                Order *order = table->getOrder();
-                if (order == nullptr)
-                {
-                    flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
-                    flashType = MsgType::ERROR;
-                    break;
-                }
-
-                consoleClear();
-                std::cout << "--- AKTIV RENDELES (ASZTAL ID: " << table->getId() << ") ---\n\n";
-
-                const List<OrderItem> &items = order->getItems();
-                if (items.getSize() == 0)
-                {
-                    flashMessage = "A rendeles jelenleg ures.";
-                    flashType = MsgType::INFO;
-                    break;
-                }
-
-                std::cout << "ID | Tetelnev | Darab | Reszosszeg\n";
-                std::cout << "-----------------------------------\n";
-                for (auto it = items.begin(); it != items.end(); ++it)
-                {
-                    const OrderItem &orderItem = *it;
-                    MenuItem *menuItem = orderItem.getItem();
-                    if (menuItem != nullptr)
-                    {
-                        std::cout << menuItem->getId() << " | "
-                                  << menuItem->getName() << " | "
-                                  << orderItem.getQuantity() << " db | "
-                                  << orderItem.getSubtotal() << " Ft\n";
-                    }
-                }
-                std::cout << "-----------------------------------\n";
-
-                int itemId = getIntInput("Add meg a modositando tetel ID-jat (0: vissza): ");
-                if (itemId == 0)
-                {
-                    break;
-                }
-
-                MenuItem *itemToUpdate = nullptr;
-                for (auto it = items.begin(); it != items.end(); ++it)
-                {
-                    MenuItem *menuItem = (*it).getItem();
-                    if (menuItem != nullptr && menuItem->getId() == itemId)
-                    {
-                        itemToUpdate = menuItem;
-                        break;
-                    }
-                }
-
-                if (itemToUpdate == nullptr)
-                {
-                    flashMessage = "A megadott ID-jú tetel nincs benne ebben a rendelesben.";
-                    flashType = MsgType::ERROR;
-                    break;
-                }
-
-                int newQuantity = -1;
-                while (newQuantity < 0)
-                {
-                    newQuantity = getIntInput("Uj darabszam (0 = torles): ");
-                    if (newQuantity < 0)
-                    {
-                        std::cout << COLOR_ERROR << "Hiba: a darabszam nem lehet negativ!\n"
-                                  << COLOR_RESET;
-                    }
-                }
-
-                try
-                {
-                    if (newQuantity == 0)
-                    {
-                        order->removeItem(itemToUpdate);
-                        flashMessage = "Tetel sikeresen torolve a rendelesbol.";
-                        flashType = MsgType::SUCCESS;
-                    }
-                    else
-                    {
-                        order->updateItemQuantity(itemToUpdate, newQuantity);
-                        flashMessage = "Tetel darabszama sikeresen modositva.";
-                        flashType = MsgType::SUCCESS;
-                    }
-                }
-                catch (const std::exception &e)
-                {
-                    flashMessage = std::string("Sikertelen modositas: ") + e.what();
-                    flashType = MsgType::ERROR;
-                }
+                modifyOrderItemInteractive(table);
                 break;
-            }
 
             case 4:
-            {
-                if (table->getOrder() == nullptr || table->getOrder()->getItems().getSize() == 0)
+                finalizeOrder(table);
+                if (flashType == MsgType::SUCCESS)
                 {
-                    flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
-                    flashType = MsgType::INFO;
-                    break;
-                }
-                try
-                {
-                    // 1. Mai dátum lekérése és formázása
-                    std::time_t t = std::time(nullptr);
-                    std::tm *now = std::localtime(&t);
-
-                    std::stringstream dateStream;
-                    dateStream << (now->tm_year + 1900) << "_"
-                               << std::setw(2) << std::setfill('0') << (now->tm_mon + 1) << "_"
-                               << std::setw(2) << std::setfill('0') << now->tm_mday;
-                    std::string todayStr = dateStream.str();
-
-                    // 2. Sorszám beolvasása a segédfájlból
-                    int nextSeq = 1;
-                    std::string counterFileName = "receipt_counter.txt";
-                    std::ifstream counterIn(counterFileName);
-                    if (counterIn.is_open())
-                    {
-                        std::string savedDate;
-                        int savedSeq;
-                        if (counterIn >> savedDate >> savedSeq)
-                        {
-                            if (savedDate == todayStr)
-                            {
-                                nextSeq = savedSeq + 1;
-                            }
-                        }
-                        counterIn.close();
-                    }
-
-                    // 3. Sorszám mentése a segédfájlba
-                    std::ofstream counterOut(counterFileName);
-                    if (counterOut.is_open())
-                    {
-                        counterOut << todayStr << " " << nextSeq;
-                        counterOut.close();
-                    }
-
-                    // 4. A végső fájlnév összerakása
-                    std::string finalFilename = "receipts/receipt_" + todayStr + "_" + std::to_string(nextSeq) + ".txt";
-
-                    // 4.5. Receipts mappa létrehozása ha nem létezik (Windows és Linux kompatibilis)
-#ifdef _WIN32
-                    _mkdir("receipts");
-#else
-                    mkdir("receipts", 0755);
-#endif
-
-                    // 5. Fájl megnyitása és asztal lezárása
-                    std::ofstream outFile(finalFilename);
-                    if (!outFile.is_open())
-                    {
-                        throw std::runtime_error("Nem sikerult letrehozni a szamlafajlt!");
-                    }
-
-                    table->closeTable(outFile);
-                    outFile.close();
-
-                    flashMessage = "Sikeres fizetes! Szamla kiallitva.";
-                    flashType = MsgType::SUCCESS;
-
                     back = true;
                 }
-                catch (const std::exception &e)
-                {
-                    flashMessage = std::string("Hiba a fizeteskor: ") + e.what();
-                    flashType = MsgType::ERROR;
-                }
+                tableBack = true;
                 break;
-            }
 
             case 0:
                 tableBack = true;
@@ -1092,6 +854,266 @@ void UI::orderMenu()
                 break;
             }
         }
+    }
+}
+
+void UI::displayOrder(Table *table)
+{
+    consoleClear();
+    Order *order = table->getOrder();
+
+    std::cout << "--- AKTIV RENDELES (ASZTAL ID: " << table->getId() << ") ---\n\n";
+
+    if (order == nullptr)
+    {
+        flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
+        flashType = MsgType::INFO;
+        return;
+    }
+
+    const List<OrderItem> &items = order->getItems();
+    if (items.getSize() == 0)
+    {
+        flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
+        flashType = MsgType::INFO;
+        return;
+    }
+
+    std::cout << "Tetelnev | Darab | Reszosszeg\n";
+    std::cout << "--------------------------------\n";
+    for (const auto &orderItem : items)
+    {
+        MenuItem *item = orderItem.getItem();
+        if (item != nullptr)
+        {
+            std::cout << item->getName() << " | "
+                      << orderItem.getQuantity() << " db | "
+                      << orderItem.getSubtotal() << " Ft\n";
+        }
+    }
+    std::cout << "--------------------------------\n";
+    std::cout << "Eddigi vegosszeg: " << order->getTotal() << " Ft\n";
+    pause();
+}
+
+void UI::addItemToOrderInteractive(Table *table)
+{
+    Order *order = table->getOrder();
+    if (order == nullptr)
+    {
+        table->openOrder();
+    }
+
+    MenuItem *item = selectMenuItemById();
+    if (item == nullptr)
+    {
+        if (!flashMessage.empty() && flashType == MsgType::ERROR)
+        {
+            return;
+        }
+        return;
+    }
+
+    int quantity = 0;
+    while (quantity <= 0)
+    {
+        quantity = getIntInput("Darabszam: ");
+        if (quantity <= 0)
+        {
+            std::cout << COLOR_ERROR << "Hiba: a darabszamnak nagyobbnak kell lennie 0-nal!\n"
+                      << COLOR_RESET;
+        }
+    }
+
+    try
+    {
+        table->addItemToOrder(item, quantity);
+        flashMessage = "Tetel sikeresen hozzaadva a rendeleshez.";
+        flashType = MsgType::SUCCESS;
+    }
+    catch (const std::exception &e)
+    {
+        flashMessage = std::string("Sikertelen hozzaadas: ") + e.what();
+        flashType = MsgType::ERROR;
+    }
+}
+
+void UI::modifyOrderItemInteractive(Table *table)
+{
+    Order *order = table->getOrder();
+    if (order == nullptr)
+    {
+        flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
+        flashType = MsgType::ERROR;
+        return;
+    }
+
+    consoleClear();
+    std::cout << "--- AKTIV RENDELES (ASZTAL ID: " << table->getId() << ") ---\n\n";
+
+    const List<OrderItem> &items = order->getItems();
+    if (items.getSize() == 0)
+    {
+        flashMessage = "A rendeles jelenleg ures.";
+        flashType = MsgType::INFO;
+        return;
+    }
+
+    std::cout << "ID | Tetelnev | Darab | Reszosszeg\n";
+    std::cout << "-----------------------------------\n";
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+        const OrderItem &orderItem = *it;
+        MenuItem *menuItem = orderItem.getItem();
+        if (menuItem != nullptr)
+        {
+            std::cout << menuItem->getId() << " | "
+                      << menuItem->getName() << " | "
+                      << orderItem.getQuantity() << " db | "
+                      << orderItem.getSubtotal() << " Ft\n";
+        }
+    }
+    std::cout << "-----------------------------------\n";
+
+    int itemId = getIntInput("Add meg a modositando tetel ID-jat (0: vissza): ");
+    if (itemId == 0)
+    {
+        return;
+    }
+
+    MenuItem *itemToUpdate = nullptr;
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+        MenuItem *menuItem = (*it).getItem();
+        if (menuItem != nullptr && menuItem->getId() == itemId)
+        {
+            itemToUpdate = menuItem;
+            break;
+        }
+    }
+
+    if (itemToUpdate == nullptr)
+    {
+        flashMessage = "A megadott ID-jú tetel nincs benne ebben a rendelesben.";
+        flashType = MsgType::ERROR;
+        return;
+    }
+
+    int newQuantity = -1;
+    while (newQuantity < 0)
+    {
+        newQuantity = getIntInput("Uj darabszam (0 = torles): ");
+        if (newQuantity < 0)
+        {
+            std::cout << COLOR_ERROR << "Hiba: a darabszam nem lehet negativ!\n"
+                      << COLOR_RESET;
+        }
+    }
+
+    try
+    {
+        if (newQuantity == 0)
+        {
+            order->removeItem(itemToUpdate);
+            flashMessage = "Tetel sikeresen torolve a rendelesbol.";
+            flashType = MsgType::SUCCESS;
+        }
+        else
+        {
+            order->updateItemQuantity(itemToUpdate, newQuantity);
+            flashMessage = "Tetel darabszama sikeresen modositva.";
+            flashType = MsgType::SUCCESS;
+        }
+    }
+    catch (const std::exception &e)
+    {
+        flashMessage = std::string("Sikertelen modositas: ") + e.what();
+        flashType = MsgType::ERROR;
+    }
+}
+
+std::string UI::prepareReceiptFileName()
+{
+    // 1. Mai dátum lekérése és formázása
+    std::time_t t = std::time(nullptr);
+    std::tm *now = std::localtime(&t);
+
+    std::stringstream dateStream;
+    dateStream << (now->tm_year + 1900) << "_"
+               << std::setw(2) << std::setfill('0') << (now->tm_mon + 1) << "_"
+               << std::setw(2) << std::setfill('0') << now->tm_mday;
+    std::string todayStr = dateStream.str();
+
+    // 2. Sorszám beolvasása a segédfájlból
+    int nextSeq = 1;
+    std::string counterFileName = "receipt_counter.txt";
+    std::ifstream counterIn(counterFileName);
+    if (counterIn.is_open())
+    {
+        std::string savedDate;
+        int savedSeq;
+        if (counterIn >> savedDate >> savedSeq)
+        {
+            if (savedDate == todayStr)
+            {
+                nextSeq = savedSeq + 1;
+            }
+        }
+        counterIn.close();
+    }
+
+    // 3. Sorszám mentése a segédfájlba
+    std::ofstream counterOut(counterFileName);
+    if (counterOut.is_open())
+    {
+        counterOut << todayStr << " " << nextSeq;
+        counterOut.close();
+    }
+
+    // 4. A végső fájlnév összerakása
+    std::string finalFilename = "receipts/receipt_" + todayStr + "_" + std::to_string(nextSeq) + ".txt";
+
+    return finalFilename;
+}
+
+void UI::finalizeOrder(Table *table)
+{
+    if (table->getOrder() == nullptr || table->getOrder()->getItems().getSize() == 0)
+    {
+        flashMessage = "Ehhez az asztalhoz jelenleg nincs aktiv rendeles.";
+        flashType = MsgType::INFO;
+        return;
+    }
+
+    try
+    {
+        // 1. Fájlnév előkészítése
+        std::string finalFilename = prepareReceiptFileName();
+
+        // 2. Receipts mappa létrehozása ha nem létezik (Windows és Linux kompatibilis)
+#ifdef _WIN32
+        _mkdir("receipts");
+#else
+        mkdir("receipts", 0755);
+#endif
+
+        // 3. Fájl megnyitása és asztal lezárása
+        std::ofstream outFile(finalFilename);
+        if (!outFile.is_open())
+        {
+            throw std::runtime_error("Nem sikerult letrehozni a szamlafajlt!");
+        }
+
+        table->closeTable(outFile);
+        outFile.close();
+
+        flashMessage = "Sikeres fizetes! Szamla kiallitva.";
+        flashType = MsgType::SUCCESS;
+    }
+    catch (const std::exception &e)
+    {
+        flashMessage = std::string("Hiba a fizeteskor: ") + e.what();
+        flashType = MsgType::ERROR;
     }
 }
 
@@ -1149,9 +1171,11 @@ void UI::printMsgBox(const std::string &msg, MsgType type)
 // "Nyomj ENTER-t a folytatáshoz..." üzenet megjelenítése és várakozás ENTER-re
 void UI::pause()
 {
+#ifndef CPORTA
     std::cout << "(Nyomj ENTER-t a folytatashoz...)\n";
     std::cin.clear();
     std::cin.get();
+#endif
 }
 
 // --- Helper input validator implementations ---

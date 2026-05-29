@@ -10,6 +10,7 @@ add_compile_options(-Wall -Wextra -pedantic -g -DMEMTRACE)
 
 include_directories(include)
 
+# Main program (without tests)
 add_executable(etterem_nhf 
     src/main.cpp
     src/restaurant.cpp
@@ -23,9 +24,9 @@ add_executable(etterem_nhf
     src/memtrace.cpp
 )
 
-# Tesztelő program
-add_executable(etterem_tesztek
-    src/tests.cpp
+# Test executable (with CPORTA flag)
+add_executable(etterem_tesztek 
+    src/main.cpp
     src/restaurant.cpp
     src/table.cpp
     src/order.cpp
@@ -37,4 +38,10 @@ add_executable(etterem_tesztek
     src/memtrace.cpp
 )
 
-target_include_directories(etterem_tesztek PRIVATE include)
+# Add CPORTA flag to test executable
+target_compile_options(etterem_tesztek PRIVATE -DCPORTA)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options(--coverage)
+    add_link_options(--coverage)
+endif()

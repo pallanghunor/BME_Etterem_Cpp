@@ -36,12 +36,12 @@ A program karakteres vizuális felületen megjeleníti az étterem alaprajzát a
 A program a futások közötti állapotmegőrzést egyszerű szöveges fájlok segítségével biztosítja. Induláskor beolvassa, kilépéskor felülírja őket. 
 
 **Bemeneti és kimeneti adatfájlok formátuma:**
-* **asztalok.txt**: ID;férőhely;leírás;X;Y;foglaltság
-* **etelek.txt**: Típus(E/I);ID;név;ár;elérhetőség;[Extra: allergén VAGY űrtartalom;alkoholos]
-* **orders.txt**: RendelésID;AsztalID;Végösszeg;TételekSzáma;[ÉtelID;Mennyiség]...
+* **tables.txt**: ID;férőhely;leírás;X;Y;foglaltság
+* **menu.txt**: Típus(E/I);ID;név;ár;elérhetőség;[Extra: allergén VAGY űrtartalom;alkoholos]
+* **orders.txt**: AsztalID;ÉtelID;Darab (Minden egyes aktív rendelési tétel külön sorban szerepel)
 
 **Generált kimenet:**
-* **Számlák**: Az asztal lezárásakor a szamlak/ mappába kerülnek generálásra szamla_YYYYMMDD_ID.txt néven. A fájl formázottan, ember számára olvashatóan tartalmazza az étterem adatait, a dátumot, a tételek listáját részösszegekkel, és a végösszeget.
+* **Számlák**: Az asztal lezárásakor a receipts/ mappába kerülnek generálásra receipt_YYYY_MM_DD_ID.txt néven. A fájl formázottan, ember számára olvashatóan tartalmazza az étterem adatait, a dátumot, a tételek listáját részösszegekkel, és a végösszeget.
 
 ### 1.4. Működési peremfeltételek és körülmények
 * **Interaktivitás és Batch mód**: A program alapértelmezetten interaktív konzolos menürendszerrel kommunikál a standard bemeneten (stdin) és kimeneten (stdout). A menüvezérlés azonban kialakításából fakadóan támogatja a fájlból történő bemenet-átirányítást, így automatizált tesztfájlokkal is működtethető.

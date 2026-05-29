@@ -102,16 +102,13 @@ MenuItem *Restaurant::getMenuItemById(int id) const
 
 void Restaurant::addTable(int id, int seats, const std::string &desc, int x, int y)
 {
-    for (auto it = tables.begin(); it != tables.end(); ++it)
+    if (isTableIdTaken(id))
     {
-        if (isTableIdTaken(id))
-        {
-            throw std::invalid_argument("Ez az asztal ID mar letezik!");
-        }
-        if (isTableAt(x, y))
-        {
-            throw std::invalid_argument("Erre a koordinatara mar van asztal rogzitve!");
-        }
+        throw std::invalid_argument("Ez az asztal ID mar letezik!");
+    }
+    if (isTableAt(x, y))
+    {
+        throw std::invalid_argument("Erre a koordinatara mar van asztal rogzitve!");
     }
 
     tables.push_back(Table(id, seats, desc, x, y));

@@ -189,6 +189,31 @@ private:
     void orderMenu();
 
     /**
+     * @brief Megjeleníti az aktív rendelés tételeit.
+     */
+    void displayOrder(Table *table);
+
+    /**
+     * @brief Interaktívan hozzáad tételt a rendeléshez.
+     */
+    void addItemToOrderInteractive(Table *table);
+
+    /**
+     * @brief Interaktívan módosít rendelés tételeket.
+     */
+    void modifyOrderItemInteractive(Table *table);
+
+    /**
+     * @brief Lezárja az asztalt és feldolgozza a fizetést.
+     */
+    void finalizeOrder(Table *table);
+
+    /**
+     * @brief Előkészíti a számlafájl nevét és útvonalát.
+     */
+    std::string prepareReceiptFileName();
+
+    /**
      * @brief Szöveget több sorra tördel.
      */
     static List<std::string> wordWrap(const std::string &text, int maxWidth);
